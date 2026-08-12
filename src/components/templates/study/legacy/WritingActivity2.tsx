@@ -1,0 +1,393 @@
+import { type ChangeEvent, Fragment, useEffect, useRef, useState } from 'react'
+
+import { useTranslation } from 'react-i18next'
+import styled from 'styled-components'
+
+import { ILegacyStudyData } from '@interfaces/study/legacy/LegacyStudy'
+import Button from '@src/components/atoms/common/Button'
+import QuizComment from '@src/components/atoms/study/comments/QuizComment'
+import { QuizBody } from '@src/components/atoms/study/layout/QuizBody'
+import WritingRevisionConfirmPopup from '@src/components/organisms/study/writing/WritingRevisionConfirmPopup'
+import { IWritingActivity2 } from '@src/interfaces/study/IWritingActivity'
+import { saveWritingActivity } from '@src/services/studyApi'
+import { resolveWritingRevisionMode } from '@src/utils/study/legacy/writingRevisionMode'
+
+function countWords(text: string): number {
+  const trimmed = text.trim()
+  if (!trimmed) return 0
+  return trimmed.split(/\s+/).length
+}
+
+export default function WritingActivity2(props: ILegacyStudyData) {
+  const { t } = useTranslation()
+  const { onFinishActivity } = props
+
+  const [draftSaved, setDraftSaved] = useState(false)
+  const [isRevisionConfirmOpen, setIsRevisionConfirmOpen] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
+  const [isFinished, setIsFinished] = useState(false)
+  const savedTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const recordLoadedRef = useRef(false)
+  const isSavingRef = useRef(false)
+
+  useEffect(() => {
+    return () => {
+      if (savedTimeoutRef.current) clearTimeout(savedTimeoutRef.current)
+    }
+  }, [])
+
+  const buildWritingPayload = (
+    saveType: 'S' | 'E' | 'R' | 'X',
+    isFinish?: boolean,
+  ) => ({
+    bookType: props.bookType,
+    studyId: props.studyId,
+    studentHistoryId: props.studentHistoryId,
+    step: `${props.currentStep}`,
+    saveType,
+    writeText: answers.join('┒'),
+    ...(isFinish ? { isFinishStudy: true } : {}),
+  })
+
+  const handleSaveDraft = async () => {
+    if (isSaving || isFinished) return
+    setIsSaving(true)
+    try {
+      await saveWritingActivity(props.mode, buildWritingPayload('X'))
+      if (savedTimeoutRef.current) clearTimeout(savedTimeoutRef.current)
+      setDraftSaved(true)
+      savedTimeoutRef.current = setTimeout(() => {
+        setDraftSaved(false)
+        savedTimeoutRef.current = null
+      }, 2000)
+    } catch {
+      // 임시저장 실패 — 자동저장이 재시도하므로 무시
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  // 첨삭 모드 (all: 스킵버튼 삭제, free: 스킵버튼 노출, limit: 첨삭 기회 없을 때 팝업이 먼저 나옴)
+  const quizData = props.quizData as IWritingActivity2 | undefined
+
+  // 최소~최대 단어 수 (서버값 우선, 없으면 fallback)
+  const minWords = quizData?.Writing?.WordMinCount ?? 10
+  const maxWords = quizData?.Writing?.WordMaxCount ?? 300
+  const revisionMode = resolveWritingRevisionMode(quizData?.Writing?.Mode)
+  const isAllRevisionMode = revisionMode === 'all'
+
+  // 첨삭 없음(No Revision): 첨삭 관련 UI(배지, 첨삭 기회) 미노출
+  const isNoRevision = quizData?.Writing?.Type === 'No Revision'
+
+  // 첨삭 횟수 (실제 데이터: Writing.MaxSubmitCount / CurrentSubmitCount)
+  const maxRevision = quizData?.Writing?.MaxSubmitCount ?? 0
+  const completedRevision = quizData?.Writing?.CurrentSubmitCount ?? 0
+  // TODO: 선생님 첨삭 완료 건수는 임시 0 처리.
+  const teacherCompletedRevision = 0
+  const showRevisionStats = !isNoRevision
+
+  const buildDefaultAnswers = (data: typeof quizData): string[] => {
+    const count = data?.Writing?.Question?.length ?? 0
+    const base = Array<string>(count).fill('')
+
+    switch (data?.Writing?.Activity) {
+      case 'Book Report':
+        if (count > 0) base[0] = `The Title is ${data.Title}`
+        if (count > 1) base[1] = `The author is ${data.Author}`
+        break
+      case 'Book Review':
+        if (count > 0)
+          base[0] =
+            'Describe briefly what happens in the book or the main idea.'
+        if (count > 1) base[1] = 'What are interesting features of the book?'
+        if (count > 2)
+          base[2] =
+            "Describe some morals or new knowledge you've learnt from the book."
+        break
+      case 'KWL Chart':
+        if (count > 0) base[0] = 'What I know'
+        if (count > 1) base[1] = 'What I want to know'
+        if (count > 2) base[2] = 'What I learned'
+        break
+      case 'Story Map':
+        if (count > 0) base[0] = 'What happened first?'
+        if (count > 1) base[1] = 'What happened next?'
+        if (count > 2) base[2] = 'What happened last?'
+        break
+    }
+
+    return base
+  }
+
+  const [answers, setAnswers] = useState<string[]>([])
+
+  useEffect(() => {
+    if (recordLoadedRef.current) return
+    if (!quizData) return
+
+    recordLoadedRef.current = true
+
+    if (props.recordedData && props.recordedData.length > 0) {
+      setAnswers(props.recordedData.map((r) => r.TempText))
+    } else {
+      setAnswers(buildDefaultAnswers(quizData))
+    }
+  }, [quizData, props.recordedData])
+
+  const handleAnswerChange = (index: number, value: string) => {
+    setAnswers((prev) => {
+      const next = [...prev]
+      next[index] = value
+      return next
+    })
+  }
+
+  const wordCount = answers.reduce(
+    (total, answer) => total + countWords(answer),
+    0,
+  )
+
+  const hasBlankAnswer = answers.some((answer) => answer.trim() === '')
+  const canSubmit =
+    !isFinished && !hasBlankAnswer && wordCount >= minWords && wordCount <= maxWords
+
+  const handleSkipWriting = async () => {
+    if (isSaving || isFinished) return
+    if (!window.confirm(t('study.writing.confirmSkip'))) return
+    setIsSaving(true)
+    setIsFinished(true)
+    try {
+      await saveWritingActivity(props.mode, buildWritingPayload('R', true))
+      onFinishActivity()
+    } catch {
+      setIsFinished(false)
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const handleSubmitAnswers = () => {
+    if (!canSubmit) return
+    setIsRevisionConfirmOpen(true)
+  }
+
+  const handleRevisionCancel = () => {
+    setIsRevisionConfirmOpen(false)
+  }
+
+  const isLimitCompleted =
+    revisionMode === 'limit' && maxRevision - completedRevision === 0
+
+  // No Revision: 첨삭 횟수 미적용 → 항상 완료 상태 팝업
+  const isAlwaysCompleted = isNoRevision || isLimitCompleted
+
+  // No Revision 은 첨삭 모드와 무관하게 스킵 버튼 항상 노출
+  const hideSkipButton = isAllRevisionMode && !isNoRevision
+
+  const isRevisionExhausted =
+    isAlwaysCompleted || completedRevision >= maxRevision
+
+  const handleRevisionConfirm = async () => {
+    if (isSaving || isFinished) return
+    setIsSaving(true)
+    setIsFinished(true)
+    try {
+      const saveType = isRevisionExhausted ? 'E' : 'S'
+      await saveWritingActivity(props.mode, buildWritingPayload(saveType, true))
+      setIsRevisionConfirmOpen(false)
+      onFinishActivity()
+    } catch {
+      setIsFinished(false)
+      setIsRevisionConfirmOpen(false)
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  useEffect(() => {
+    if (isLimitCompleted && !isFinished) {
+      setIsRevisionConfirmOpen(true)
+    }
+  }, [isLimitCompleted, isFinished])
+
+  useEffect(() => {
+    isSavingRef.current = isSaving
+  }, [isSaving])
+
+  useEffect(() => {
+    if (isFinished) return
+    const interval = setInterval(() => {
+      if (isSavingRef.current || isFinished) return
+      void saveWritingActivity(props.mode, buildWritingPayload('X'))
+    }, 10000)
+    return () => clearInterval(interval)
+  }, [answers, isFinished])
+
+  return (
+    <>
+      <QuizBody>
+        {quizData?.Writing?.Question?.map((question, i) => (
+          <Fragment key={i}>
+            <QuizComment
+              style={{
+                color: '#3C4B62',
+                fontFamily: 'RG-B, sans-serif',
+                marginTop: '8px',
+              }}
+            >
+              {i + 1}. {question}
+            </QuizComment>
+
+            <InputArea>
+              <InputAreaTextarea
+                value={answers[i] ?? ''}
+                onChange={(event: ChangeEvent<HTMLTextAreaElement>) =>
+                  handleAnswerChange(i, event.target.value)
+                }
+                placeholder={t('study.writing.answerPlaceholder')}
+              />
+            </InputArea>
+          </Fragment>
+        ))}
+        <ButtonArea>
+          <WhiteButton
+            type='button'
+            onClick={handleSkipWriting}
+            style={hideSkipButton ? { visibility: 'hidden' } : undefined}
+            aria-hidden={hideSkipButton}
+            tabIndex={hideSkipButton ? -1 : undefined}
+          >
+            {t('study.writing.skip')}
+          </WhiteButton>
+          <SubmitButtonGroup>
+            <WordCounter>
+              <WordCountValue>
+                {t('study.writing.wordCount', { count: wordCount })}
+              </WordCountValue>{' '}
+              ({minWords}~{maxWords})
+            </WordCounter>
+            <WhiteButton type='button' onClick={handleSaveDraft}>
+              {draftSaved
+                ? t('study.writing.saved')
+                : t('study.writing.saveDraft')}
+            </WhiteButton>
+            <SubmitButton
+              type='button'
+              className={canSubmit ? 'active' : undefined}
+              disabled={!canSubmit}
+              onClick={handleSubmitAnswers}
+            >
+              {revisionMode === 'limit'
+                ? t('study.writing.submitRevision')
+                : t('study.writing.submit')}
+            </SubmitButton>
+          </SubmitButtonGroup>
+        </ButtonArea>
+      </QuizBody>
+
+      {isRevisionConfirmOpen ? (
+        <WritingRevisionConfirmPopup
+          maxRevision={maxRevision}
+          completedRevision={completedRevision}
+          teacherCompletedRevision={teacherCompletedRevision}
+          showRevisionStats={showRevisionStats}
+          showModeBadge={!isNoRevision}
+          revisionMode={revisionMode}
+          isRevisionExhausted={isRevisionExhausted}
+          onConfirm={handleRevisionConfirm}
+          onCancel={handleRevisionCancel}
+        />
+      ) : null}
+    </>
+  )
+}
+
+const InputArea = styled.div`
+  width: calc(100% - 40px);
+  min-height: 120px;
+  background-color: #fff;
+  border-radius: 20px;
+  padding: 20px;
+  padding-bottom: 0;
+`
+
+const InputAreaTextarea = styled.textarea`
+  width: 100%;
+  min-height: 100px;
+  font-family: 'Rg-R', 'Fredoka', sans-serif;
+  font-size: 16px;
+  background-color: transparent;
+  resize: none;
+  border: none;
+  padding: 0;
+  padding-bottom: 20px;
+  -webkit-tap-highlight-color: transparent;
+
+  &::placeholder {
+    color: rgb(162, 177, 196, 0.5);
+  }
+
+  &:focus {
+    box-shadow: none;
+  }
+`
+
+const ButtonArea = styled.div`
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+`
+
+const SubmitButtonGroup = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+`
+
+const WhiteButton = styled(Button)`
+  cursor: pointer;
+  background-color: #fff;
+  padding: 10px 20px;
+  border-radius: 100px;
+  color: #a2b1c4;
+  font-family: 'Rg-B', 'Fredoka', sans-serif;
+  font-size: 14px;
+
+  &:active {
+    transform: scale(0.98);
+  }
+`
+
+const SubmitButton = styled(Button)`
+  cursor: not-allowed;
+  background-color: rgba(32, 173, 117, 0.2);
+  padding: 10px 20px;
+  border-radius: 100px;
+  color: #fff;
+  font-family: 'Rg-B', 'Fredoka', sans-serif;
+  font-size: 14px;
+
+  &.active {
+    cursor: pointer;
+    background-color: #20ad75;
+
+    &:active {
+      transform: scale(0.98);
+    }
+  }
+
+  &:disabled {
+    opacity: 1;
+  }
+`
+
+const WordCounter = styled.div`
+  font-family: 'Rg-R', 'Fredoka', sans-serif;
+  font-size: 14px;
+  color: #a2b1c4;
+`
+
+const WordCountValue = styled.span`
+  font-family: 'Rg-B', 'Fredoka', sans-serif;
+  color: #20ad75;
+`
