@@ -209,7 +209,7 @@ export default function VocabularyTest1(props: ILegacyStudyData) {
         />
       </QuestionImageFrameVocabularyWide>
 
-      <OptionCardsRow>
+      <OptionCardsRow $direction='row' $mobileDirection='column'>
         {shuffledExamples.map((opt, index) => (
           <GridQuizOptionCardBox
             key={`${currentMeta.quizId}-${opt.Text}`}

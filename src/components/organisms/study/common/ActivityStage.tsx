@@ -1,7 +1,9 @@
 import { type ReactNode } from 'react'
 
+import { media } from '@styles/tokens/breakpoints'
 import styled from 'styled-components'
 
+import QuizContainerStatusHeader from '@components/molecules/study/layout/QuizContainerStatusHeader'
 import { useQuizContainerWidthScale } from '@hooks/study/useQuizContainerWidthScale'
 
 type ActivityStageProps = {
@@ -32,7 +34,10 @@ export default function ActivityStage({
   return (
     <StageWrapper>
       <StageContent $scale={contentScale}>
-        <StageBody>{children}</StageBody>
+        <QuizContainerStatusHeader />
+        <StageBodySlot>
+          <StageBody>{children}</StageBody>
+        </StageBodySlot>
       </StageContent>
       {extras}
     </StageWrapper>
@@ -45,22 +50,53 @@ const StageWrapper = styled.div`
   align-items: center;
   width: 100%;
   height: 100%;
+  min-height: 100%;
+  padding: 0 16px;
+  box-sizing: border-box;
+
+  ${media.mobile} {
+    padding: 0 8px;
+  }
 `
 
 const StageContent = styled.div<{ $scale: number }>`
   transform: scale(${(p) => p.$scale});
   transform-origin: center center;
+  width: 100%;
+  max-width: 900px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   min-width: 900px;
   min-height: 100px;
   background-color: rgba(255, 255, 255, 0.9);
   -webkit-backdrop-filter: blur(3px);
   backdrop-filter: blur(3px);
   border: 3px solid rgba(0, 0, 0, 0.1);
-  border-radius: 30px;
+  border-radius: 40px;
+  box-sizing: border-box;
+
+  ${media.tablet} {
+    min-width: 0;
+    border-width: 2px;
+    border-radius: 28px;
+  }
+
+  ${media.mobile} {
+    transform: none;
+    border-radius: 24px;
+  }
+`
+
+const StageBodySlot = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  width: 100%;
+  min-height: 0;
 `
 
 const StageBody = styled.div`
@@ -68,4 +104,8 @@ const StageBody = styled.div`
   flex-direction: column;
   gap: 24px;
   width: 100%;
+
+  ${media.mobile} {
+    gap: 16px;
+  }
 `

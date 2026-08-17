@@ -197,7 +197,7 @@ export default function ReadingComprehension1(props: ILegacyStudyData) {
           </TextBox>
         </ReadingComprehension1QuestionContainer>
 
-        <SelectionCardsRow>
+        <SelectionCardsRow direction='row' mobileDirection='column'>
           {shuffledExamples.map((opt, index) => (
             <LargeImageQuizChoiceCard
               key={`${currentMeta.quizId}-${index}`}

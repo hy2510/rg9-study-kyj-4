@@ -1,3 +1,4 @@
+import { media } from '@styles/tokens/breakpoints'
 import { styled } from 'styled-components'
 
 /**
@@ -16,6 +17,11 @@ const AugmentOverlay = styled.div<{ $clickable?: boolean }>`
   align-items: center;
   z-index: 1000;
   cursor: ${({ $clickable }) => ($clickable ? 'pointer' : 'default')};
+
+  ${media.mobile} {
+    padding: 0 16px;
+    box-sizing: border-box;
+  }
 `
 
 export default AugmentOverlay

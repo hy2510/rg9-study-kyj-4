@@ -1,3 +1,4 @@
+import { media } from '@styles/tokens/breakpoints'
 import { styled } from 'styled-components'
 
 export const Summary2SentenceText = styled.span`
@@ -7,6 +8,10 @@ export const Summary2SentenceText = styled.span`
   color: #3c4b62;
   line-height: 32px;
   text-align: left;
+
+  ${media.mobile} {
+    line-height: 28px;
+  }
 `
 
 export const Summary2BlankSlot = styled.span<{
@@ -30,4 +35,13 @@ export const Summary2BlankSlot = styled.span<{
     props.$filled ? '#fff ' : props.$isNext ? '#fff ' : '#e9edf3 '};
   color: ${(props) =>
     props.$filled ? (props.$isCorrect ? '#6abf8a' : '#e07a7a') : 'inherit'};
+
+  ${media.mobile} {
+    line-height: 28px;
+    min-width: ${(props) => (props.$filled ? '0' : '40px')};
+    max-width: 100%;
+    height: ${(props) => (props.$filled ? 'auto' : '28px')};
+    padding: ${(props) => (props.$isNext ? '0 2px' : '0')};
+    word-break: break-word;
+  }
 `

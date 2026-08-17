@@ -12,14 +12,16 @@ import {
  */
 export const SpellingDisplayBox = styled.div<QuizSelectableFeedbackStateProps>`
   display: flex;
-  justify-content: center;
+  justify-content: safe center;
   align-items: center;
   gap: 4px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
   height: 80px;
   padding: 16px;
   margin-bottom: 12px;
-  border-radius: 15px;
+  border-radius: 20px;
   border: ${(p) => resolveQuizSelectableFeedback(p).border};
   background: ${(p) => resolveQuizSelectableFeedback(p).bg};
   transition: all 0.2s ease;
@@ -31,6 +33,5 @@ export const SpellingDisplayBox = styled.div<QuizSelectableFeedbackStateProps>`
     height: 64px;
     padding: 10px 8px;
     margin-bottom: 8px;
-    border-radius: 12px;
   }
 `

@@ -8,7 +8,7 @@ export const BlockTextQuizCardBox = styled(QuizSelectableFeedbackBox)`
   width: calc(100% - 32px);
   min-height: 28px;
   height: fit-content;
-  border-radius: 15px;
+  border-radius: 20px;
   display: flex;
   justify-content: flex-start;
   align-items: flex-start;

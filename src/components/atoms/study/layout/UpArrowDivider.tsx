@@ -8,6 +8,7 @@ export const UpArrowDividerWrap = styled.div`
   align-items: center;
   padding: 8px;
   gap: 12px;
+  flex-shrink: 0;
 
   .line {
     width: 100%;

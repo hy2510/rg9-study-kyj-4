@@ -22,12 +22,11 @@ export default function QuestionSoundButton({
 }: QuestionSoundButtonProps) {
   const enabled = augmentOptions?.questionAudio?.enableSound ?? forceEnable
   if (!enabled) return null
-  if (!soundUrl) return null
 
   return (
     <ButtonSoundPlay
       position='left-top'
-      soundUrl={soundUrl}
+      soundUrl={soundUrl ?? ''}
       augmentOptions={augmentOptions}
       autoPlay={autoPlay}
       replayKey={replayKey}

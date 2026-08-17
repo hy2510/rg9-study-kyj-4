@@ -336,7 +336,7 @@ export function useSummary1Quiz({
       [expectedMeta.quizNo]: nextTry,
     }))
     setHintTry(hintTryNext)
-    fillCorrectAndAdvance(expectedQuizId, false)
+    fillCorrectAndAdvance(expectedQuizId, true)
   }
 
   /**

@@ -6,7 +6,7 @@ export const NextQuestionButton = styled.button<{ $marginBottom?: number }>`
   align-self: flex-end;
   padding: 12px 20px;
   font-family: 'Rg-B', sans-serif;
-  font-size: 16px;
+  font-size: 0.875rem;
   font-weight: 700;
   color: #fff;
   background-color: #20ad75;

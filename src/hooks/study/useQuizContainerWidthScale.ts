@@ -6,7 +6,7 @@ export const QUIZ_CONTAINER_BASE_WIDTH = 1920
 export const QUIZ_CONTAINER_DESIGN_WIDTH = 900
 
 export const QUIZ_CONTAINER_MIN_SCALE = 0.92
-export const QUIZ_CONTAINER_MAX_SCALE = 1.05
+export const QUIZ_CONTAINER_MAX_SCALE = 1.25
 
 function getViewportWidth(fallback = QUIZ_CONTAINER_BASE_WIDTH): number {
   if (typeof window === 'undefined') return fallback

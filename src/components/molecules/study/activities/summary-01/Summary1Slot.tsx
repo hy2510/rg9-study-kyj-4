@@ -6,7 +6,7 @@ export const Summary1SlotContentBox = styled.div<{
   $isReading?: boolean
 }>`
   padding: 14px 16px;
-  border-radius: 15px;
+  border-radius: 20px;
   border: 1.5px solid #e9edf3;
   background: ${(props) => {
     if (props.$isReading) return '#fff9c4'

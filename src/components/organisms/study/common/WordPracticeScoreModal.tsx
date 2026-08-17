@@ -220,7 +220,7 @@ const ProceedButton = styled.button`
   height: 50px;
   width: 100%;
   padding: 0 20px;
-  border-radius: 12px;
+  border-radius: 20px;
   border: 1.5px solid #3c4b62;
   background-color: #3c4b62;
   color: #fff;

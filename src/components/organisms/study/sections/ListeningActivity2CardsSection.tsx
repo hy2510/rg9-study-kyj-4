@@ -19,7 +19,7 @@ export default function ListeningActivity2CardsSection({
   onCardClick,
 }: ListeningActivity2CardsSectionProps) {
   return (
-    <CardsWrapCenter>
+    <CardsWrapCenter mobileLayout='grid' mobileColumns={2}>
       {quizData.map((quiz, index) => (
         <ListeningActivity2Card
           key={quiz.QuizId}

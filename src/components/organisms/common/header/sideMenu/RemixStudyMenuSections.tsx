@@ -171,7 +171,7 @@ const StudyTable = styled.table`
         font-size: 0.9em;
         text-align: center;
         padding: 8px 10px;
-        border-top: 1px solid #e9edf3;
+        border-top: 1.5px solid #e9edf3;
 
         &:first-child {
           color: #a2b1c4;

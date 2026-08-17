@@ -187,7 +187,7 @@ export default function ListeningActivity3(props: ILegacyStudyData) {
           {t(ACTIVITY_INSTRUCTIONS.LISTENING_ACTIVITY3)}
         </QuizComment>
 
-        <SelectionCardsRow>
+        <SelectionCardsRow direction='row' mobileDirection='column'>
           {shuffledExamples.map((opt, index) => (
             <LargeImageQuizChoiceCard
               key={`${currentMeta.quizId}-${index}`}

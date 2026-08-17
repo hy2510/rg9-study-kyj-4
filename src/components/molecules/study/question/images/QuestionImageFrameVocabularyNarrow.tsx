@@ -1,3 +1,4 @@
+import { media } from '@styles/tokens/breakpoints'
 import styled from 'styled-components'
 
 import QuestionImageFrame, {
@@ -14,6 +15,19 @@ const QuestionImageFrameVocabularyNarrow = styled(QuestionImageFrame)`
     min-width: 307px;
     width: auto;
     height: ${QUESTION_IMAGE_FRAME_HEIGHT_PX}px;
+  }
+
+  ${media.mobile} {
+    min-width: 0;
+    width: 100%;
+
+    img {
+      min-width: 0;
+      max-width: 100%;
+      width: auto;
+      height: 30vh;
+      object-fit: contain;
+    }
   }
 `
 

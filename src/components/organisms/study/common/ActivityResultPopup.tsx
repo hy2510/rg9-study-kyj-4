@@ -1,8 +1,11 @@
 import { useEffect, useMemo } from 'react'
 
+import { media } from '@styles/tokens/breakpoints'
 import styled from 'styled-components'
 
 import TextBox from '@components/atoms/common/TextBox'
+import { resolveQuizSelectableFeedback } from '@components/atoms/study/feedback/QuizSelectableFeedbackFoundation'
+import { IntroStartButton } from '@components/molecules/common/intro/IntroLayout'
 import PopupLayout from '@components/molecules/common/PopupLayout'
 import type { LegacyQuizMark } from '@interfaces/common/header/LegacyQuizMark'
 import type { LegacyStepProgress } from '@interfaces/common/header/LegacyStepProgress'
@@ -11,12 +14,14 @@ import {
   countCorrectRows,
 } from '@src/utils/study/legacy/computeStepScore'
 import { getQuizCorrectionCharacterMarks } from '@utils/Assets'
+import { formatActivityLabel } from '@utils/study/formatActivityLabel'
 
 /**
  * 사내 정책 — 한 문제당 시도 가능 횟수는 최대 3번.
  * 실제 표 컬럼 수는 활동의 `stepProgress.quizAnswerCount` 에 맞춰 1 ~ 3 으로 조정된다.
  */
 const ATTEMPT_COLUMNS_HARD_CAP = 3
+const ATTEMPT_COLUMN_LABELS = ['1st', '2nd', '3rd'] as const
 
 /** 이 점수 미만이면 캐릭터 미노출 + Average 텍스트 빨간색 */
 const AVERAGE_PASS_SCORE = 70
@@ -115,11 +120,11 @@ export default function ActivityResultPopup({
   }, [onProceed])
 
   return (
-    <PopupLayout onClose={onProceed} hideCloseButton>
+    <PopupLayout onClose={onProceed} hideCloseButton fitContent>
       <Container>
         <Header>
           <TextBox fontSize={0.9} fontWeight={5} color='secondary'>
-            {`Step ${stepId} · ${activity}`}
+            {`Step ${stepId} · ${formatActivityLabel(activity)}`}
           </TextBox>
           <TextBox fontSize={1.6} fontWeight={7} color='primary'>
             Your Score
@@ -133,17 +138,23 @@ export default function ActivityResultPopup({
 
           {notice ? <NoticeText>{notice}</NoticeText> : null}
 
-          <SummaryRow>
+          <SummaryRow $isBelowPass={isAverageBelowPass}>
             <SummaryItem>
-              <SummaryLabel>Average</SummaryLabel>
-              <AverageValue $isBelowPass={isAverageBelowPass}>
+              <SummaryLabel $isBelowPass={isAverageBelowPass}>
+                Average
+              </SummaryLabel>
+              <SummaryValue $isBelowPass={isAverageBelowPass}>
                 {`${score}`}
-              </AverageValue>
+              </SummaryValue>
             </SummaryItem>
-            <SummaryDivider aria-hidden />
+            <SummaryDivider $isBelowPass={isAverageBelowPass} aria-hidden />
             <SummaryItem>
-              <SummaryLabel>Correct</SummaryLabel>
-              <SummaryValue>{`${correctRows} / ${totalRows}`}</SummaryValue>
+              <SummaryLabel $isBelowPass={isAverageBelowPass}>
+                Correct
+              </SummaryLabel>
+              <SummaryValue $isBelowPass={isAverageBelowPass}>
+                {`${correctRows} / ${totalRows}`}
+              </SummaryValue>
             </SummaryItem>
           </SummaryRow>
         </Header>
@@ -183,16 +194,16 @@ export default function ActivityResultPopup({
               <Table>
                 <thead>
                   <tr>
-                    <Th $width={56}>#</Th>
+                    <Th $width={72}>#</Th>
                     {Array.from({ length: attemptColumns }).map((_, i) => (
-                      <Th key={i}>{`${i + 1}`}</Th>
+                      <Th key={i}>{ATTEMPT_COLUMN_LABELS[i]}</Th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
                   {attempts.map((row, rowIdx) => (
                     <tr key={rowIdx}>
-                      <TdIndex>{rowIdx + 1}</TdIndex>
+                      <TdIndex>{`Q ${rowIdx + 1}`}</TdIndex>
                       {Array.from({ length: attemptColumns }).map(
                         (_, colIdx) => (
                           <TdCell key={colIdx}>
@@ -234,6 +245,10 @@ const Container = styled.div`
   min-height: 0;
   gap: 16px;
   padding: 4px 8px 0;
+
+  ${media.mobile} {
+    flex: 0 1 auto;
+  }
 `
 
 const Header = styled.div`
@@ -247,14 +262,23 @@ const CharacterFigure = styled.div`
   justify-content: center;
   margin-top: 4px;
   position: absolute;
-  top: -80px;
-  right: -20px;
+  top: -82px;
+  right: -12px;
 
   img {
     display: block;
     width: auto;
     height: 180px;
     object-fit: contain;
+  }
+
+  ${media.mobile} {
+    top: -8px;
+    right: 8px;
+
+    img {
+      height: 90px;
+    }
   }
 `
 
@@ -266,16 +290,24 @@ const NoticeText = styled.p`
   color: #3c4b62;
 `
 
-const SummaryRow = styled.div`
+const SummaryRow = styled.div<{ $isBelowPass: boolean }>`
   margin-top: 6px;
   display: flex;
   align-items: stretch;
   justify-content: center;
   gap: 16px;
   padding: 12px 16px;
-  border-radius: 15px;
-  border: 1px solid #e9edf3;
-  background-color: rgb(250, 251, 253);
+  border-radius: 20px;
+  border: ${({ $isBelowPass }) =>
+    resolveQuizSelectableFeedback({
+      $isCorrect: !$isBelowPass,
+      $isIncorrect: $isBelowPass,
+    }).border};
+  background-color: ${({ $isBelowPass }) =>
+    resolveQuizSelectableFeedback({
+      $isCorrect: !$isBelowPass,
+      $isIncorrect: $isBelowPass,
+    }).bg};
 `
 
 const SummaryItem = styled.div`
@@ -286,27 +318,25 @@ const SummaryItem = styled.div`
   gap: 4px;
 `
 
-const SummaryLabel = styled.div`
+const SummaryLabel = styled.div<{ $isBelowPass: boolean }>`
   font-family: 'Rg-B', sans-serif;
   font-size: 0.85rem;
   font-weight: 500;
-  color: #a2b1c4;
+  color: ${({ $isBelowPass }) => ($isBelowPass ? '#ef3d2e' : '#158b5c')};
+  opacity: 0.55;
 `
 
-const SummaryValue = styled.div<{ $isBelowPass?: boolean }>`
+const SummaryValue = styled.div<{ $isBelowPass: boolean }>`
   font-family: 'Rg-B', sans-serif;
-  font-size: 1.6rem;
+  font-size: 2rem;
   font-weight: 700;
-  color: ${(p) => (p.$isBelowPass ? '#ef3d2e' : '#3c4b62')};
+  color: ${({ $isBelowPass }) => ($isBelowPass ? '#ef3d2e' : '#158b5c')};
 `
 
-const AverageValue = styled(SummaryValue)`
-  color: ${(p) => (p.$isBelowPass ? '#ef3d2e' : '#20ad75')};
-`
-
-const SummaryDivider = styled.div`
-  width: 1px;
-  background-color: #e1e7ef;
+const SummaryDivider = styled.div<{ $isBelowPass: boolean }>`
+  width: 1.5px;
+  background-color: ${({ $isBelowPass }) =>
+    $isBelowPass ? 'rgba(239, 61, 46, 0.25)' : 'rgba(27, 170, 112, 0.25)'};
 `
 
 const Body = styled.div`
@@ -314,6 +344,10 @@ const Body = styled.div`
   min-height: 0;
   display: flex;
   flex-direction: column;
+
+  ${media.mobile} {
+    flex: 0 1 auto;
+  }
 `
 
 const EmptyState = styled.div`
@@ -337,8 +371,8 @@ const ReviewCard = styled.div`
   flex-direction: column;
   gap: 6px;
   padding: 12px 14px;
-  border: 1px solid #e9edf3;
-  border-radius: 15px;
+  border: 1.5px solid #e9edf3;
+  border-radius: 20px;
   background-color: rgb(250, 251, 253);
 `
 
@@ -383,11 +417,12 @@ const ReviewCorrect = styled.span`
 `
 
 const TableScroll = styled.div`
-  flex: 1;
+  flex: 0 1 auto;
   min-height: 0;
+  height: fit-content;
   overflow-y: auto;
-  border: 1px solid #e9edf3;
-  border-radius: 15px;
+  border: 1.5px solid #e9edf3;
+  border-radius: 20px;
 `
 
 const Table = styled.table`
@@ -402,6 +437,10 @@ const Table = styled.table`
     background-color: #fafbfd;
     z-index: 1;
   }
+
+  tbody tr:last-child td {
+    border-bottom: none;
+  }
 `
 
 const Th = styled.th<{ $width?: number }>`
@@ -409,7 +448,7 @@ const Th = styled.th<{ $width?: number }>`
   font-weight: 600;
   color: #a2b1c4;
   padding: 10px 8px;
-  border-bottom: 1px solid #e9edf3;
+  border-bottom: 1.5px solid #e9edf3;
   text-align: center;
   ${(p) => (p.$width ? `width: ${p.$width}px;` : '')}
 `
@@ -417,16 +456,17 @@ const Th = styled.th<{ $width?: number }>`
 const TdIndex = styled.td`
   padding: 10px 8px;
   text-align: center;
+  white-space: nowrap;
   font-size: 0.95rem;
   font-weight: 600;
   color: #3c4b62;
-  border-bottom: 1px solid #f1f4f8;
+  border-bottom: 1.5px solid #e9edf3;
 `
 
 const TdCell = styled.td`
   padding: 8px;
   text-align: center;
-  border-bottom: 1px solid #f1f4f8;
+  border-bottom: 1.5px solid #e9edf3;
 `
 
 const MarkBadge = styled.span<{ $variant: 'correct' | 'incorrect' }>`
@@ -454,24 +494,25 @@ const Footer = styled.div`
   display: flex;
   justify-content: flex-end;
   padding-top: 8px;
+
+  ${media.mobile} {
+    padding-top: 0;
+    padding-bottom: 4px;
+  }
 `
 
-const ProceedButton = styled.button`
+const ProceedButton = styled(IntroStartButton)`
+  max-width: none;
+  margin-top: 0;
+  margin-bottom: 8px;
   height: 50px;
-  width: 100%;
-  padding: 0 20px;
-  border-radius: 12px;
-  border: 1.5px solid #3c4b62;
-  background-color: #3c4b62;
-  color: #fff;
-  font-family: 'Rg-B', sans-serif;
   font-size: 1.1em;
   font-weight: 700;
-  cursor: pointer;
-  box-shadow: 0 3px 0 0 #1a1a1a;
+  border-color: #ff374b;
+  background-color: #ff374b;
+  box-shadow: 0 3px 0 0 #ce0000;
 
-  &:active {
-    transform: translateY(2px);
-    box-shadow: none;
+  ${media.mobile} {
+    margin-bottom: 6px;
   }
 `

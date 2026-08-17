@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 
+import { media } from '@styles/tokens/breakpoints'
 import { useTranslation } from 'react-i18next'
 import { styled } from 'styled-components'
 
@@ -153,9 +154,9 @@ export default function Summary1({ quizData, onComplete }: Summary1Props) {
             aria-label={isPlaying ? '전체 듣기 정지' : '전체 듣기 재생'}
           >
             {isPlaying ? (
-              <IconSoundStop width={60} height={60} />
+              <IconSoundStop width={40} height={40} />
             ) : (
-              <IconSoundPlay width={60} height={60} />
+              <IconSoundPlay width={40} height={40} />
             )}
           </Summary1SoundToggle>
         </SoundPlayButtonWrap>
@@ -282,8 +283,8 @@ const SoundPlayButtonWrap = styled.div`
 
 const Summary1SoundToggle = styled.button`
   cursor: pointer;
-  width: 60px;
-  height: 60px;
+  width: 40px;
+  height: 40px;
   padding: 0;
   border: none;
   border-radius: 50%;
@@ -295,6 +296,17 @@ const Summary1SoundToggle = styled.button`
 
   &:active {
     transform: scale(0.98) translateY(1px);
+  }
+
+  ${media.mobile} {
+    width: 32px;
+    height: 32px;
+
+    img,
+    svg {
+      width: 32px;
+      height: 32px;
+    }
   }
 `
 

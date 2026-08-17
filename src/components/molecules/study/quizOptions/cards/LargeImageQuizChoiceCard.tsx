@@ -1,5 +1,6 @@
 import { useState } from 'react'
 
+import { media } from '@styles/tokens/breakpoints'
 import { styled } from 'styled-components'
 
 import { CardImageSkeleton } from '@components/atoms/study/cards/CardImageSkeleton'
@@ -17,11 +18,9 @@ export type LargeImageQuizChoiceCardProps = {
 }
 
 const LargeImageQuizChoiceCardBox = styled(QuizSelectableFeedbackBox)`
-  min-width: 380px;
-  width: 100%;
-  min-height: 380px;
-  height: auto;
   cursor: pointer;
+  width: 100%;
+  min-height: 30vh;
   overflow: hidden;
   background: #fff;
   border-radius: 35px;
@@ -30,6 +29,19 @@ const LargeImageQuizChoiceCardBox = styled(QuizSelectableFeedbackBox)`
   align-items: center;
   position: relative;
   transition: all 0.05s ease;
+
+  ${media.tablet} {
+    min-height: 40vh;
+  }
+
+  @media (max-height: 900px) {
+    min-height: 45vh;
+  }
+
+  ${media.mobile} {
+    border-radius: 20px;
+    min-height: 25vh;
+  }
 `
 
 export function LargeImageQuizChoiceCard({

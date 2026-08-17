@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react'
+import { useContext } from 'react'
 
 import { useTranslation } from 'react-i18next'
 
@@ -23,6 +23,7 @@ import { useHeartContext } from '@contexts/HeartContext'
 import { useQuizFeedbackOptional } from '@contexts/QuizFeedbackContext'
 import { useWritingActivity1Quiz } from '@hooks/study/legacy/useWritingActivity1Quiz'
 import { useWritingActivity1View } from '@hooks/study/legacy/useWritingActivity1View'
+import { useWritingActivity1SlotInteraction } from '@hooks/study/useWritingActivity1SlotInteraction'
 import { ILegacyStudyData } from '@interfaces/study/legacy/LegacyStudy'
 import { ACTIVITY_INSTRUCTIONS } from '@src/constants/study/activityInstructions'
 import { IWritingActivity1 } from '@src/interfaces/study/IWritingActivity'
@@ -85,8 +86,14 @@ export default function WritingActivity1(props: ILegacyStudyData) {
     quizFeedback,
   })
 
-  const [dragFromIndex, setDragFromIndex] = useState<number | null>(null)
-  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
+  const { getSlotProps } = useWritingActivity1SlotInteraction({
+    selectedCount: selectedIds.length,
+    isChecked,
+    onReorder: handleSlotReorder,
+    onRemove: handleSlotClick,
+    onDragStart: handleSlotDragStart,
+    onDragEnd: handleSlotDragEnd,
+  })
 
   if (!isReady || !currentMeta) return <CenteredLoading />
 
@@ -109,12 +116,11 @@ export default function WritingActivity1(props: ILegacyStudyData) {
             $isCorrect={isCorrect}
             $isIncorrect={isIncorrect}
           >
-            <WritingActivity1SentenceRow>
+            <WritingActivity1SentenceRow $isCorrect={isCorrect}>
               {Array.from({ length: slotCount }).map((_, i) => {
                 const token = selectedIds[i]
                   ? tokenById.get(selectedIds[i])
                   : undefined
-                const canDragSlot = !isChecked && !!token
                 return (
                   <WritingActivity1SlotBox
                     key={i}
@@ -128,44 +134,7 @@ export default function WritingActivity1(props: ILegacyStudyData) {
                     $isIncorrect={isIncorrect}
                     $clickable={!isChecked && !!token}
                     $isCompleted={showFinishedSentence}
-                    $draggable={canDragSlot}
-                    $isDragging={dragFromIndex === i}
-                    $isDragOver={dragOverIndex === i}
-                    draggable={canDragSlot}
-                    onDragStart={(e) => {
-                      if (!canDragSlot) return
-                      e.stopPropagation()
-                      handleSlotDragStart()
-                      setDragFromIndex(i)
-                      e.dataTransfer.effectAllowed = 'move'
-                      e.dataTransfer.setData('text/plain', String(i))
-                    }}
-                    onDragOver={(e) => {
-                      if (isChecked || dragFromIndex === null) return
-                      if (i >= selectedIds.length) return
-                      e.preventDefault()
-                      e.dataTransfer.dropEffect = 'move'
-                      setDragOverIndex(i)
-                    }}
-                    onDragLeave={() => {
-                      setDragOverIndex((prev) => (prev === i ? null : prev))
-                    }}
-                    onDrop={(e) => {
-                      e.preventDefault()
-                      e.stopPropagation()
-                      if (dragFromIndex === null || dragFromIndex === i) return
-                      if (i >= selectedIds.length) return
-                      handleSlotReorder(dragFromIndex, i)
-                      setDragFromIndex(null)
-                      setDragOverIndex(null)
-                      handleSlotDragEnd()
-                    }}
-                    onDragEnd={() => {
-                      setDragFromIndex(null)
-                      setDragOverIndex(null)
-                      handleSlotDragEnd()
-                    }}
-                    onClick={() => handleSlotClick(i)}
+                    {...getSlotProps(i, !!token)}
                   >
                     <TextBox
                       fontSize={isCorrect ? 1.6 : 1.3}

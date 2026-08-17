@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
 
+import { media } from '@styles/tokens/breakpoints'
 import { styled } from 'styled-components'
 
 import { renderActivity } from '@components/templates/study/remix/features/renderActivity'
+import QuizContainerStatusHeader from '@components/molecules/study/layout/QuizContainerStatusHeader'
 import { useQuizFeedbackOptional } from '@contexts/QuizFeedbackContext'
 import {
   getAugmentOptions,
@@ -121,6 +123,7 @@ export default function Review({
         </ReviewContent>
       ) : (
         <ReviewContent $scale={contentScale}>
+          <QuizContainerStatusHeader />
           {currentQuiz && (
             <ActivityTypeBadge>{currentQuiz.activityType}</ActivityTypeBadge>
           )}
@@ -146,11 +149,19 @@ const ReviewWrapper = styled.div`
   align-items: center;
   width: 100%;
   height: 100%;
+  padding: 0 16px;
+  box-sizing: border-box;
+
+  ${media.mobile} {
+    padding: 0 8px;
+  }
 `
 
 const ReviewContent = styled.div<{ $scale: number }>`
   transform: scale(${(p) => p.$scale});
   transform-origin: center center;
+  width: 100%;
+  max-width: 900px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -161,16 +172,19 @@ const ReviewContent = styled.div<{ $scale: number }>`
   -webkit-backdrop-filter: blur(3px);
   backdrop-filter: blur(3px);
   border: 3px solid rgba(255, 255, 255, 0.1);
-  border-radius: 30px;
-`
+  border-radius: 40px;
+  box-sizing: border-box;
 
-const ReviewBody = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-  width: 100%;
-  flex: 1;
-  padding: 24px;
+  ${media.tablet} {
+    min-width: 0;
+    border-width: 2px;
+    border-radius: 28px;
+  }
+
+  ${media.mobile} {
+    transform: none;
+    border-radius: 24px;
+  }
 `
 
 const ActivityTypeBadge = styled.div`

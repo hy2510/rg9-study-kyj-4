@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 
+import { media } from '@styles/tokens/breakpoints'
 import { styled } from 'styled-components'
 
 import TextBox from '@components/atoms/common/TextBox'
@@ -49,6 +50,19 @@ const ListeningActivity2CardBox = styled.div<{
       : resolveQuizSelectableFeedback(props).boxShadow};
 
   ${(props) => props.$pressed && quizSelectablePressedStyle}
+
+  ${media.mobile} {
+    min-width: 0;
+    width: 100%;
+    min-height: 140px;
+    border-radius: 20px;
+  }
+`
+
+const CardText = styled(TextBox)`
+  ${media.mobile} {
+    font-size: 1.75em;
+  }
 `
 
 export function ListeningActivity2Card({
@@ -80,7 +94,7 @@ export function ListeningActivity2Card({
       $showResultText={isSolved || (isCorrect && showResultText)}
       onClick={() => onCardClick(index)}
     >
-      <TextBox
+      <CardText
         fontSize={2.5}
         fontWeight={6}
         color={
@@ -88,7 +102,7 @@ export function ListeningActivity2Card({
         }
       >
         <span dangerouslySetInnerHTML={{ __html: text }} />
-      </TextBox>
+      </CardText>
     </ListeningActivity2CardBox>
   )
 }

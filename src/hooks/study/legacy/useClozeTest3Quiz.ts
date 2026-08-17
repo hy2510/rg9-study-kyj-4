@@ -481,11 +481,13 @@ export function useClozeTest3Quiz({
   const onSeekSound = (deltaSec: number) => {
     if (!currentMeta?.sound) return
     seekBy(deltaSec)
+    if (playState === '') {
+      resumeAudio()
+    }
   }
 
   const isSoundControlDisabled = penaltyState !== 'none' || !currentMeta?.sound
-  const canSeekSound =
-    !isSoundControlDisabled && (playState === 'playing' || playState === 'paused')
+  const canSeekSound = !isSoundControlDisabled
 
   return {
     currentMeta,

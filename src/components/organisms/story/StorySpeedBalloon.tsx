@@ -130,17 +130,17 @@ const OptionRow = styled.button<{ $selected: boolean }>`
   padding: 12px 16px;
   border: none;
   background: ${({ $selected }) =>
-    $selected ? 'rgba(61, 126, 239, 0.1)' : 'transparent'};
+    $selected ? 'rgba(32, 173, 117, 0.12)' : 'transparent'};
   font-family: 'RG-B', sans-serif;
   font-size: 0.9em;
   font-weight: ${({ $selected }) => ($selected ? 700 : 500)};
-  color: ${({ $selected }) => ($selected ? '#1a4fc7' : '#3C4B62')};
+  color: ${({ $selected }) => ($selected ? '#199261' : '#3C4B62')};
   cursor: pointer;
   transition: background 0.12s ease;
 
   &:hover {
     background: ${({ $selected }) =>
-      $selected ? 'rgba(61, 126, 239, 0.14)' : 'rgba(0, 0, 0, 0.04)'};
+      $selected ? 'rgba(32, 173, 117, 0.18)' : 'rgba(0, 0, 0, 0.04)'};
   }
 
   &:active {

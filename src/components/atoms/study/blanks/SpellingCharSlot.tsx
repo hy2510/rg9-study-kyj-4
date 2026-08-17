@@ -1,3 +1,4 @@
+import { media } from '@styles/tokens/breakpoints'
 import { styled } from 'styled-components'
 
 /**
@@ -13,7 +14,8 @@ export const SpellingCharSlot = styled.span<{
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: ${(p) => (p.$isFixed ? '16px' : '28px')};
+  min-width: 16px;
+  flex-shrink: 0;
   height: 44px;
   color: ${(p) =>
     p.$isPlaceholder

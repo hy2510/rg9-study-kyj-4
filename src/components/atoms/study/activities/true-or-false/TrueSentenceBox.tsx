@@ -1,7 +1,6 @@
 import styled from 'styled-components'
 
 export const TrueSentenceBox = styled.div`
-  margin-top: 16px;
   padding: 12px 16px;
   display: flex;
   flex-direction: column;
@@ -15,7 +14,7 @@ export const TrueSentenceBox = styled.div`
   .content {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 4px;
   }
 
   .play-btn {

@@ -1,6 +1,7 @@
 import { useContext, useEffect, useMemo, useRef } from 'react'
 
 import { useTranslation } from 'react-i18next'
+import styled from 'styled-components'
 
 import CenteredLoading from '@components/atoms/common/CenteredLoading'
 import { IconSoundPlay } from '@components/atoms/common/icons/IconSoundPlay'
@@ -21,7 +22,6 @@ import QuizComment from '@components/atoms/study/comments/QuizComment'
 import {
   ActivityRoundButton,
   MainContentBox,
-  SoundPlayButtonWrap,
 } from '@components/atoms/study/layout/ActivityLayout'
 import { QuizBody } from '@components/atoms/study/layout/QuizBody'
 import { UpArrowDivider } from '@components/atoms/study/layout/UpArrowDivider'
@@ -33,10 +33,7 @@ import {
   PenaltyWordBox,
 } from '@components/molecules/study/activities/summary-01/Summary1PenaltyInput'
 import { Summary1SlotContentBox } from '@components/molecules/study/activities/summary-01/Summary1Slot'
-import {
-  NextQuestionButton,
-  NextQuestionButtonWrap,
-} from '@components/molecules/study/question/NextQuestionButton'
+import { NextQuestionButton } from '@components/molecules/study/question/NextQuestionButton'
 import { StudySummaryOptionCardButton } from '@components/molecules/study/quizOptions/cards/StudySummaryOptionCardButton'
 import { AppContext, AppContextProps } from '@contexts/AppContext'
 import { useHeartContext } from '@contexts/HeartContext'
@@ -170,21 +167,6 @@ export default function Summary1(props: ILegacyStudyData) {
 
   return (
     <Summary1Root>
-      {isCompleted && hasAnySound && (
-        <SoundPlayButtonWrap>
-          <ActivityRoundButton
-            type='button'
-            onClick={toggleSequentialAudio}
-            aria-label={isPlaying ? '전체 듣기 정지' : '전체 듣기 재생'}
-          >
-            {isPlaying ? (
-              <IconSoundStop width={60} height={60} />
-            ) : (
-              <IconSoundPlay width={60} height={60} />
-            )}
-          </ActivityRoundButton>
-        </SoundPlayButtonWrap>
-      )}
       <QuizBody ref={summaryContainerRef}>
         {!isCompleted && (
           <QuizComment>{t(ACTIVITY_INSTRUCTIONS.SUMMARY1)}</QuizComment>
@@ -193,6 +175,22 @@ export default function Summary1(props: ILegacyStudyData) {
         <MainContentBox>
           <AnswerAreaContainer ref={answerAreaRef} $isCompleted={isCompleted}>
             <AnswerAreaScroll ref={answerScrollRef} $isCompleted={isCompleted}>
+              {isCompleted && hasAnySound && (
+                <ResultListSoundWrap>
+                  <ActivityRoundButton
+                    type='button'
+                    $size={40}
+                    onClick={toggleSequentialAudio}
+                    aria-label={isPlaying ? '전체 듣기 정지' : '전체 듣기 재생'}
+                  >
+                    {isPlaying ? (
+                      <IconSoundStop width={40} height={40} />
+                    ) : (
+                      <IconSoundPlay width={40} height={40} />
+                    )}
+                  </ActivityRoundButton>
+                </ResultListSoundWrap>
+              )}
               {selectedAnswers.map((entry, index) => {
                 const isReadingLine =
                   isCompleted && playingIndex !== null && playingIndex === index
@@ -242,16 +240,15 @@ export default function Summary1(props: ILegacyStudyData) {
                   </TextBox>
                 </Summary1SlotContentBox>
               )}
+              {isCompleted && (
+                <ResultListNextWrap>
+                  <NextQuestionButton type='button' onClick={handleProceedClick}>
+                    {t('study.confirm')}
+                  </NextQuestionButton>
+                </ResultListNextWrap>
+              )}
             </AnswerAreaScroll>
           </AnswerAreaContainer>
-
-          {isCompleted && (
-            <NextQuestionButtonWrap>
-              <NextQuestionButton type='button' onClick={handleProceedClick}>
-                {t('study.nextQuestion')}
-              </NextQuestionButton>
-            </NextQuestionButtonWrap>
-          )}
 
           {!isCompleted && (
             <>
@@ -372,21 +369,21 @@ export default function Summary1(props: ILegacyStudyData) {
                         </TextBox>
                       </StudySummaryOptionCardButton>
                     ))}
+                    {hintMeta.IsEnabled && (
+                      <HintButtonWrap>
+                        <HintButton
+                          type='button'
+                          onClick={handleHintClick}
+                          disabled={
+                            isCheckingAnswer ||
+                            (hintMeta.Max ?? 0) - hintTry <= 0
+                          }
+                        >
+                          Chance ({Math.max((hintMeta.Max ?? 0) - hintTry, 0)})
+                        </HintButton>
+                      </HintButtonWrap>
+                    )}
                   </OptionCardsArea>
-
-                  {hintMeta.IsEnabled && (
-                    <HintButtonWrap>
-                      <HintButton
-                        type='button'
-                        onClick={handleHintClick}
-                        disabled={
-                          isCheckingAnswer || (hintMeta.Max ?? 0) - hintTry <= 0
-                        }
-                      >
-                        Hint ({Math.max((hintMeta.Max ?? 0) - hintTry, 0)})
-                      </HintButton>
-                    </HintButtonWrap>
-                  )}
                 </>
               )}
             </>
@@ -396,3 +393,16 @@ export default function Summary1(props: ILegacyStudyData) {
     </Summary1Root>
   )
 }
+
+const ResultListSoundWrap = styled.div`
+  display: flex;
+  justify-content: flex-start;
+  padding: 4px 0 8px;
+`
+
+const ResultListNextWrap = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+  padding-top: 0;
+`

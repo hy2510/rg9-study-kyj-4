@@ -4,6 +4,8 @@ import { shuffle } from 'lodash'
 import { useTranslation } from 'react-i18next'
 import { styled } from 'styled-components'
 
+import { media } from '@styles/tokens/breakpoints'
+
 import TextBox from '@components/atoms/common/TextBox'
 import { CardImageSkeleton } from '@components/atoms/study/cards/CardImageSkeleton'
 import QuizComment from '@components/atoms/study/comments/QuizComment'
@@ -116,4 +118,9 @@ const VocabularyTest2QuestionContainer = styled.div`
 const VocabularyTest2CardsContainer = styled.div`
   display: flex;
   gap: 12px;
+
+  ${media.mobile} {
+    flex-direction: column;
+    gap: 8px;
+  }
 `

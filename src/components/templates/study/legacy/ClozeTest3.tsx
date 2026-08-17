@@ -205,12 +205,6 @@ export default function ClozeTest3(props: ILegacyStudyData) {
     <>
       <QuestionSoundWrapper>
         <SoundControlGroup>
-          <SoundPlayToggleIcon
-            isPlaying={playState === 'playing'}
-            disabled={isSoundControlDisabled}
-            onClick={onPlaySoundToggle}
-            icon={<IconSoundLongPlay width={60} height={60} />}
-          />
           <SoundSeekButton
             aria-label='5초 뒤로'
             disabled={!canSeekSound}
@@ -218,6 +212,12 @@ export default function ClozeTest3(props: ILegacyStudyData) {
           >
             -5s
           </SoundSeekButton>
+          <SoundPlayToggleIcon
+            isPlaying={playState === 'playing'}
+            disabled={isSoundControlDisabled}
+            onClick={onPlaySoundToggle}
+            icon={<IconSoundLongPlay width={40} height={40} />}
+          />
           <SoundSeekButton
             aria-label='5초 앞으로'
             disabled={!canSeekSound}

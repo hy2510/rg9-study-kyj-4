@@ -161,17 +161,17 @@ const StagePanel = styled.div<{
   -webkit-backdrop-filter: blur(3px);
   backdrop-filter: blur(3px);
   border: 3px solid rgba(0, 0, 0, 0.1);
-  border-radius: 30px;
+  border-radius: 40px;
   box-sizing: border-box;
 
   ${media.tablet} {
     min-width: 0;
-    border-radius: 20px;
+    border-radius: 28px;
     border-width: 2px;
   }
 
   ${media.mobile} {
-    border-radius: 16px;
+    border-radius: 24px;
   }
 
   ${({ $mobileFooter }) =>

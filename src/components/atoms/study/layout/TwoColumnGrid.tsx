@@ -1,3 +1,4 @@
+import { media } from '@styles/tokens/breakpoints'
 import type { ReactNode } from 'react'
 import styled from 'styled-components'
 
@@ -13,4 +14,9 @@ const Grid = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
+
+  ${media.mobile} {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+  }
 `

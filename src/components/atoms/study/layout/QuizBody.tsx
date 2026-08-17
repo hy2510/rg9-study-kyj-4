@@ -3,7 +3,7 @@ import { forwardRef, useEffect, useState } from 'react'
 import { BREAKPOINT_MOBILE_MAX, media } from '@styles/tokens/breakpoints'
 import styled, { css } from 'styled-components'
 
-export const QUIZ_BODY_MAX_HEIGHT_OFFSET_PX = 200
+export const QUIZ_BODY_MAX_HEIGHT_OFFSET_PX = 120
 export const QUIZ_BODY_MAX_HEIGHT_OFFSET_MOBILE_PX = 112
 
 function getViewportHeight(fallback = 800): number {
@@ -53,17 +53,20 @@ function useQuizBodyMaxHeightPx() {
 type QuizBodyProps = React.ComponentPropsWithoutRef<'div'> & {
   $maxHeightPx?: number | null
   $flexWrap?: boolean
+  $fillToMaxHeight?: boolean
 }
 
 const StyledQuizBody = styled.div<{
   $maxHeightPx?: number | null
   $flexWrap?: boolean
+  $fillToMaxHeight?: boolean
 }>`
   display: flex;
   flex-direction: column;
   gap: 16px;
   width: 100%;
   padding: 50px;
+  padding-top: 25px;
   box-sizing: border-box;
 
   ${media.tablet} {
@@ -81,16 +84,24 @@ const StyledQuizBody = styled.div<{
       flex-wrap: wrap;
     `}
 
-  ${({ $maxHeightPx }) =>
+  ${({ $maxHeightPx, $fillToMaxHeight }) =>
     $maxHeightPx != null &&
     css`
       max-height: ${$maxHeightPx}px;
       overflow-y: auto;
+
+      ${$fillToMaxHeight &&
+      css`
+        ${media.mobile} {
+          height: ${$maxHeightPx}px;
+          overflow: hidden;
+        }
+      `}
     `}
 `
 
 export const QuizBody = forwardRef<HTMLDivElement, QuizBodyProps>(
-  function QuizBody({ $maxHeightPx, $flexWrap, ...rest }, ref) {
+  function QuizBody({ $maxHeightPx, $flexWrap, $fillToMaxHeight, ...rest }, ref) {
     const viewportMaxHeightPx = useQuizBodyMaxHeightPx()
     const cap =
       $maxHeightPx === null
@@ -104,6 +115,7 @@ export const QuizBody = forwardRef<HTMLDivElement, QuizBodyProps>(
         ref={ref}
         $flexWrap={$flexWrap}
         $maxHeightPx={cap}
+        $fillToMaxHeight={$fillToMaxHeight}
         {...rest}
       />
     )

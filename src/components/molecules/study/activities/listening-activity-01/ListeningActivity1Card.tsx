@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 
-import { styled } from 'styled-components'
+import { media } from '@styles/tokens/breakpoints'
+import { css, styled } from 'styled-components'
 
 import TextBox from '@components/atoms/common/TextBox'
 import { CardImageSkeleton } from '@components/atoms/study/cards/CardImageSkeleton'
@@ -22,7 +23,7 @@ const ListeningActivity1CardBox = styled(QuizSelectableFeedbackBox)<{
 }>`
   min-width: 250px;
   width: calc(100% / 3 - 16px);
-  min-height: 168px;
+  min-height: 0;
   height: auto;
   cursor: ${(props) => (props.$isSolved ? 'default' : 'pointer')};
   pointer-events: ${(props) => (props.$isSolved ? 'none' : 'auto')};
@@ -34,6 +35,19 @@ const ListeningActivity1CardBox = styled(QuizSelectableFeedbackBox)<{
   align-items: center;
   position: relative;
   transition: all 0.05s ease;
+
+  ${({ $isCorrect }) =>
+    $isCorrect &&
+    css`
+      box-shadow: none;
+    `}
+
+  ${media.mobile} {
+    min-width: 0;
+    width: 100%;
+    min-height: 0;
+    border-radius: 20px;
+  }
 
   .card-text {
     position: absolute;
@@ -47,6 +61,13 @@ const ListeningActivity1CardBox = styled(QuizSelectableFeedbackBox)<{
     align-items: center;
     z-index: 1;
     animation: cardTextFadeIn 0.5s ease-out forwards;
+    font-family: 'Rg-B', 'Fredoka', sans-serif;
+    font-size: 2.5em;
+    font-weight: 600;
+
+    ${media.mobile} {
+      font-size: 1.75em;
+    }
 
     @keyframes cardTextFadeIn {
       from {
@@ -93,9 +114,7 @@ export function ListeningActivity1Card({
     >
       {displayText && (
         <div className='card-text'>
-          <TextBox fontSize={2.5} fontWeight={6} color='primary'>
-            <span dangerouslySetInnerHTML={{ __html: text }} />
-          </TextBox>
+          <span dangerouslySetInnerHTML={{ __html: text }} />
         </div>
       )}
       <QuizOptionImageFrameListeningActivity1>

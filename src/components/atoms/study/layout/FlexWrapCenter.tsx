@@ -1,3 +1,4 @@
+import { media } from '@styles/tokens/breakpoints'
 import type { ReactNode } from 'react'
 import styled from 'styled-components'
 
@@ -15,4 +16,13 @@ const Wrap = styled.div`
   gap: 12px;
   justify-content: center;
   align-items: center;
+
+  ${media.mobile} {
+    gap: 8px;
+
+    > * {
+      min-width: 0;
+      width: 100%;
+    }
+  }
 `

@@ -13,7 +13,7 @@ export const StudySummaryOptionCardButton = styled.button<{
 }>`
   cursor: pointer;
   width: 100%;
-  border-radius: 15px;
+  border-radius: 20px;
   padding: 16px;
   transition: all 0.05s ease;
   border: ${(props) =>
@@ -37,4 +37,5 @@ export const StudySummaryOptionCardButton = styled.button<{
   &:disabled {
     cursor: not-allowed;
   }
+
 `

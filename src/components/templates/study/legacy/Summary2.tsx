@@ -1,9 +1,9 @@
 import { useContext, useEffect, useRef } from 'react'
 
 import { useTranslation } from 'react-i18next'
+import { styled } from 'styled-components'
 
 import CenteredLoading from '@components/atoms/common/CenteredLoading'
-import { IconArrowRightButton } from '@components/atoms/common/icons/IconArrowRightButton'
 import { IconSoundPlay } from '@components/atoms/common/icons/IconSoundPlay'
 import { IconSoundStop } from '@components/atoms/common/icons/IconSoundStop'
 import TextBox from '@components/atoms/common/TextBox'
@@ -14,9 +14,7 @@ import { Summary2Root } from '@components/atoms/study/activities/summary-02/Summ
 import QuizComment from '@components/atoms/study/comments/QuizComment'
 import {
   ActivityRoundButton,
-  AugmentNextButtonWrap,
   MainContentBox,
-  SoundPlayButtonWrap,
 } from '@components/atoms/study/layout/ActivityLayout'
 import { QuizBody } from '@components/atoms/study/layout/QuizBody'
 import { UpArrowDivider } from '@components/atoms/study/layout/UpArrowDivider'
@@ -24,6 +22,7 @@ import {
   Summary2BlankSlot,
   Summary2SentenceText,
 } from '@components/molecules/study/activities/summary-02/Summary2Slots'
+import { NextQuestionButton } from '@components/molecules/study/question/NextQuestionButton'
 import { StudySummaryOptionCardButton } from '@components/molecules/study/quizOptions/cards/StudySummaryOptionCardButton'
 import { AppContext, AppContextProps } from '@contexts/AppContext'
 import { useHeartContext } from '@contexts/HeartContext'
@@ -121,41 +120,30 @@ export default function Summary2(props: ILegacyStudyData) {
 
   return (
     <Summary2Root>
-      {isComplete && sentenceSound && (
-        <SoundPlayButtonWrap>
-          <ActivityRoundButton
-            type='button'
-            onClick={handlePlaySoundToggle}
-            aria-label={
-              playState === 'playing' ? '문장 듣기 정지' : '문장 듣기 재생'
-            }
-          >
-            {playState === 'playing' ? (
-              <IconSoundStop width={60} height={60} />
-            ) : (
-              <IconSoundPlay width={60} height={60} />
-            )}
-          </ActivityRoundButton>
-        </SoundPlayButtonWrap>
-      )}
-      {isComplete && (
-        <AugmentNextButtonWrap>
-          <ActivityRoundButton
-            type='button'
-            onClick={handleProceedClick}
-            aria-label='다음 단계로 이동'
-          >
-            <IconArrowRightButton width={60} height={60} />
-          </ActivityRoundButton>
-        </AugmentNextButtonWrap>
-      )}
-
-      <QuizBody>
+      <QuizBody $fillToMaxHeight>
         {!isComplete && (
           <QuizComment>{t(ACTIVITY_INSTRUCTIONS.SUMMARY2)}</QuizComment>
         )}
 
         <MainContentBox>
+          {isComplete && sentenceSound && (
+            <ResultListSoundWrap>
+              <ActivityRoundButton
+                type='button'
+                $size={40}
+                onClick={handlePlaySoundToggle}
+                aria-label={
+                  playState === 'playing' ? '문장 듣기 정지' : '문장 듣기 재생'
+                }
+              >
+                {playState === 'playing' ? (
+                  <IconSoundStop width={40} height={40} />
+                ) : (
+                  <IconSoundPlay width={40} height={40} />
+                )}
+              </ActivityRoundButton>
+            </ResultListSoundWrap>
+          )}
           <SentencePanel ref={sentencePanelRef} $isCompleted={isComplete}>
             <Summary2SentenceText>
               {sentenceShape.lines.map((line, lineIdx) => (
@@ -194,6 +182,13 @@ export default function Summary2(props: ILegacyStudyData) {
               ))}
             </Summary2SentenceText>
           </SentencePanel>
+          {isComplete && (
+            <ResultListNextWrap>
+              <NextQuestionButton type='button' onClick={handleProceedClick}>
+                {t('study.confirm')}
+              </NextQuestionButton>
+            </ResultListNextWrap>
+          )}
 
           {!isComplete && (
             <>
@@ -230,3 +225,18 @@ export default function Summary2(props: ILegacyStudyData) {
     </Summary2Root>
   )
 }
+
+const ResultListSoundWrap = styled.div`
+  display: flex;
+  justify-content: flex-start;
+  flex-shrink: 0;
+  padding: 4px 0 8px;
+`
+
+const ResultListNextWrap = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  flex-shrink: 0;
+  width: 100%;
+  padding-top: 0;
+`

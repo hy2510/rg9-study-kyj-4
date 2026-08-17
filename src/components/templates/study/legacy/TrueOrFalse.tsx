@@ -13,10 +13,7 @@ import { SoundPlayToggleIcon } from '@components/atoms/study/audio/SoundPlayTogg
 import QuizComment from '@components/atoms/study/comments/QuizComment'
 import { QuizBody } from '@components/atoms/study/layout/QuizBody'
 import TwoColumnCardsSection from '@components/molecules/study/layout/TwoColumnCardsSection'
-import {
-  NextQuestionButton,
-  NextQuestionButtonWrap,
-} from '@components/molecules/study/question/NextQuestionButton'
+import { NextQuestionButton } from '@components/molecules/study/question/NextQuestionButton'
 import QuestionContentRow from '@components/molecules/study/question/QuestionContentRow'
 import { BlockTextQuizCardBox } from '@components/molecules/study/quizOptions/cards/BlockTextQuizCardBox'
 import { AppContext, AppContextProps } from '@contexts/AppContext'
@@ -57,7 +54,7 @@ export default function TrueOrFalse(props: ILegacyStudyData) {
   const [currentQuizIndex, setCurrentQuizIndex] = useState<number>(1)
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
   const [showTrueSentence, setShowTrueSentence] = useState<boolean>(false)
-  const isWorking = useRef<boolean>(true)
+  const isWorking = useRef<boolean>(false)
 
   useEffect(() => {
     if (!isReady) return
@@ -91,6 +88,7 @@ export default function TrueOrFalse(props: ILegacyStudyData) {
   const correctIndex = currentMeta.isQuestionTrue ? 0 : 1
 
   const proceedAfterAnswer = () => {
+    isWorking.current = false
     setSelectedIndex(null)
     setShowTrueSentence(false)
     stopAudio()
@@ -142,16 +140,25 @@ export default function TrueOrFalse(props: ILegacyStudyData) {
       isFinishStudy: props.lastStep === props.currentStep,
     })
 
-    try {
-      const res = await saveUserAnswer(studyInfo.mode, userAnswer)
-      if (Number(res.result) !== 0) {
+    const finalize = () => {
+      if (!isCorrect || !currentMeta.isQuestionTrue) {
+        setShowTrueSentence(true)
         isWorking.current = false
-        setSelectedIndex(null)
         return
       }
+      proceedAfterAnswer()
+    }
+
+    if (quizFeedback) {
+      quizFeedback.presentResult(isCorrect, finalize)
+    } else {
+      finalize()
+    }
+
+    try {
+      const res = await saveUserAnswer(studyInfo.mode, userAnswer)
+      if (Number(res.result) !== 0) return
     } catch {
-      isWorking.current = false
-      setSelectedIndex(null)
       return
     }
 
@@ -170,22 +177,6 @@ export default function TrueOrFalse(props: ILegacyStudyData) {
     props.onUpdateRecord?.(tempRecord)
     if (!isCorrect) {
       heart.decrease()
-    }
-
-    const finalize = () => {
-      // 정답 문장이 거짓이면 정답 문장 노출 후 사용자 다음 클릭 대기
-      if (!currentMeta.isQuestionTrue) {
-        setShowTrueSentence(true)
-        isWorking.current = false
-      } else {
-        proceedAfterAnswer()
-      }
-    }
-
-    if (quizFeedback) {
-      quizFeedback.presentResult(isCorrect, finalize)
-    } else {
-      finalize()
     }
   }
 
@@ -212,7 +203,7 @@ export default function TrueOrFalse(props: ILegacyStudyData) {
       <QuestionSoundWrapper>
         <SoundPlayToggleIcon
           isPlaying={playState === 'playing' && !showTrueSentence}
-          disabled={selectedIndex !== null}
+          disabled={selectedIndex !== null || !currentMeta.questionSound}
           onClick={handleQuestionSound}
         />
       </QuestionSoundWrapper>
@@ -246,7 +237,7 @@ export default function TrueOrFalse(props: ILegacyStudyData) {
 
         {showTrueSentence && (
           <TrueSentenceBox>
-            <span className='label'>True sentence</span>
+            <span className='label'>True sentence:</span>
             <div className='content'>
               <button
                 type='button'
@@ -271,16 +262,14 @@ export default function TrueOrFalse(props: ILegacyStudyData) {
               </TextBox>
             </div>
 
-            <NextQuestionButtonWrap>
-              <NextQuestionButton
-                $marginBottom={0}
-                type='button'
-                tabIndex={-1}
-                onClick={proceedAfterAnswer}
-              >
-                {t('study.nextQuestion')}
-              </NextQuestionButton>
-            </NextQuestionButtonWrap>
+            <NextQuestionButton
+              $marginBottom={0}
+              type='button'
+              tabIndex={-1}
+              onClick={proceedAfterAnswer}
+            >
+              {t('study.confirm')}
+            </NextQuestionButton>
           </TrueSentenceBox>
         )}
       </QuizBody>

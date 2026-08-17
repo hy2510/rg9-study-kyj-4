@@ -1,10 +1,12 @@
 import { type ChangeEvent, Fragment, useEffect, useRef, useState } from 'react'
 
+import { media } from '@styles/tokens/breakpoints'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
 
 import { ILegacyStudyData } from '@interfaces/study/legacy/LegacyStudy'
 import Button from '@src/components/atoms/common/Button'
+import { HintButton } from '@src/components/atoms/study/buttons/HintButton'
 import QuizComment from '@src/components/atoms/study/comments/QuizComment'
 import { QuizBody } from '@src/components/atoms/study/layout/QuizBody'
 import WritingRevisionConfirmPopup from '@src/components/organisms/study/writing/WritingRevisionConfirmPopup'
@@ -120,6 +122,7 @@ export default function WritingActivity2(props: ILegacyStudyData) {
   }
 
   const [answers, setAnswers] = useState<string[]>([])
+  const [isReady, setIsReady] = useState(false)
 
   useEffect(() => {
     if (recordLoadedRef.current) return
@@ -132,6 +135,7 @@ export default function WritingActivity2(props: ILegacyStudyData) {
     } else {
       setAnswers(buildDefaultAnswers(quizData))
     }
+    setIsReady(true)
   }, [quizData, props.recordedData])
 
   const handleAnswerChange = (index: number, value: string) => {
@@ -181,8 +185,16 @@ export default function WritingActivity2(props: ILegacyStudyData) {
   // No Revision: 첨삭 횟수 미적용 → 항상 완료 상태 팝업
   const isAlwaysCompleted = isNoRevision || isLimitCompleted
 
+  const seededAnswers = buildDefaultAnswers(quizData)
+  const hasUserInput = answers.some((answer, index) => {
+    const seeded = seededAnswers[index] ?? ''
+    return answer.length > 0 && answer !== seeded
+  })
+
   // No Revision 은 첨삭 모드와 무관하게 스킵 버튼 항상 노출
-  const hideSkipButton = isAllRevisionMode && !isNoRevision
+  // 입력이 한 글자라도 있으면 스킵 숨김, 입력이 없으면 활성화
+  const hideSkipButton =
+    (isAllRevisionMode && !isNoRevision) || hasUserInput
 
   const isRevisionExhausted =
     isAlwaysCompleted || completedRevision >= maxRevision
@@ -249,16 +261,18 @@ export default function WritingActivity2(props: ILegacyStudyData) {
             </InputArea>
           </Fragment>
         ))}
+        {isReady ? (
         <ButtonArea>
-          <WhiteButton
+          <HintButton
             type='button'
             onClick={handleSkipWriting}
+            disabled={hideSkipButton}
             style={hideSkipButton ? { visibility: 'hidden' } : undefined}
             aria-hidden={hideSkipButton}
             tabIndex={hideSkipButton ? -1 : undefined}
           >
             {t('study.writing.skip')}
-          </WhiteButton>
+          </HintButton>
           <SubmitButtonGroup>
             <WordCounter>
               <WordCountValue>
@@ -266,23 +280,28 @@ export default function WritingActivity2(props: ILegacyStudyData) {
               </WordCountValue>{' '}
               ({minWords}~{maxWords})
             </WordCounter>
-            <WhiteButton type='button' onClick={handleSaveDraft}>
-              {draftSaved
-                ? t('study.writing.saved')
-                : t('study.writing.saveDraft')}
-            </WhiteButton>
-            <SubmitButton
-              type='button'
-              className={canSubmit ? 'active' : undefined}
-              disabled={!canSubmit}
-              onClick={handleSubmitAnswers}
-            >
-              {revisionMode === 'limit'
-                ? t('study.writing.submitRevision')
-                : t('study.writing.submit')}
-            </SubmitButton>
+            {hideSkipButton ? (
+              <ActionButtonRow>
+                <HintButton type='button' onClick={handleSaveDraft}>
+                  {draftSaved
+                    ? t('study.writing.saved')
+                    : t('study.writing.saveDraft')}
+                </HintButton>
+                <SubmitButton
+                  type='button'
+                  className={canSubmit ? 'active' : undefined}
+                  disabled={!canSubmit}
+                  onClick={handleSubmitAnswers}
+                >
+                  {revisionMode === 'limit'
+                    ? t('study.writing.submitRevision')
+                    : t('study.writing.submit')}
+                </SubmitButton>
+              </ActionButtonRow>
+            ) : null}
           </SubmitButtonGroup>
         </ButtonArea>
+        ) : null}
       </QuizBody>
 
       {isRevisionConfirmOpen ? (
@@ -303,9 +322,11 @@ export default function WritingActivity2(props: ILegacyStudyData) {
 }
 
 const InputArea = styled.div`
-  width: calc(100% - 40px);
+  width: 100%;
+  box-sizing: border-box;
   min-height: 120px;
   background-color: #fff;
+  border: 1.5px solid #e9edf3;
   border-radius: 20px;
   padding: 20px;
   padding-bottom: 0;
@@ -313,6 +334,8 @@ const InputArea = styled.div`
 
 const InputAreaTextarea = styled.textarea`
   width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   min-height: 100px;
   font-family: 'Rg-R', 'Fredoka', sans-serif;
   font-size: 16px;
@@ -336,25 +359,70 @@ const ButtonArea = styled.div`
   display: flex;
   justify-content: space-between;
   gap: 10px;
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
+  flex-wrap: wrap;
+
+  ${media.mobile} {
+    flex-direction: column;
+    align-items: stretch;
+    flex-wrap: nowrap;
+
+    > button[aria-hidden='true'] {
+      display: none;
+    }
+
+    > button {
+      width: 100%;
+    }
+  }
 `
 
 const SubmitButtonGroup = styled.div`
   display: flex;
   align-items: center;
   gap: 10px;
+
+  ${media.mobile} {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+  }
 `
 
-const WhiteButton = styled(Button)`
-  cursor: pointer;
-  background-color: #fff;
-  padding: 10px 20px;
-  border-radius: 100px;
-  color: #a2b1c4;
-  font-family: 'Rg-B', 'Fredoka', sans-serif;
-  font-size: 14px;
+const ActionButtonRow = styled.div`
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  gap: 10px;
 
-  &:active {
-    transform: scale(0.98);
+  > button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+  }
+
+  ${media.tablet} {
+    width: 100%;
+
+    > button {
+      flex: 1 1 0;
+      min-width: 0;
+      width: auto;
+    }
+  }
+`
+
+const WordCounter = styled.div`
+  font-family: 'Rg-R', 'Fredoka', sans-serif;
+  font-size: 14px;
+  color: #a2b1c4;
+
+  ${media.mobile} {
+    text-align: center;
   }
 `
 
@@ -362,10 +430,13 @@ const SubmitButton = styled(Button)`
   cursor: not-allowed;
   background-color: rgba(32, 173, 117, 0.2);
   padding: 10px 20px;
-  border-radius: 100px;
+  border: 1.5px solid transparent;
+  border-radius: 999px;
   color: #fff;
-  font-family: 'Rg-B', 'Fredoka', sans-serif;
-  font-size: 14px;
+  font-family: 'Rg-B', sans-serif;
+  font-size: 0.875rem;
+  font-weight: 600;
+  box-sizing: border-box;
 
   &.active {
     cursor: pointer;
@@ -379,12 +450,6 @@ const SubmitButton = styled(Button)`
   &:disabled {
     opacity: 1;
   }
-`
-
-const WordCounter = styled.div`
-  font-family: 'Rg-R', 'Fredoka', sans-serif;
-  font-size: 14px;
-  color: #a2b1c4;
 `
 
 const WordCountValue = styled.span`

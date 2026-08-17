@@ -2,7 +2,7 @@ import { styled } from 'styled-components'
 
 export const HintButtonWrap = styled.div`
   display: flex;
-  justify-content: center;
+  justify-content: flex-end;
   padding: 8px 0 4px;
   flex: 0 0 auto;
 `
@@ -11,19 +11,15 @@ export const HintButton = styled.button`
   min-width: 120px;
   padding: 10px 20px;
   border-radius: 999px;
-  border: 1px solid #d6dde7;
+  border: 1.5px solid #e9edf3;
   background-color: #ffffff;
-  color: #2563eb;
-  font-size: 0.95rem;
+  color: #a2b1c4;
+  font-family: 'Rg-B', sans-serif;
+  font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
-  transition:
-    background-color 0.1s ease,
-    transform 0.05s ease;
+  transition: transform 0.05s ease;
 
-  &:hover:not(:disabled) {
-    background-color: #f3f7ff;
-  }
   &:active:not(:disabled) {
     transform: translateY(1px);
   }

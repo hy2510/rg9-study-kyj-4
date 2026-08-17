@@ -31,6 +31,11 @@ const SideMenuRowStyled = styled.button`
   cursor: pointer;
   text-align: left;
 
+  img {
+    filter: brightness(0) saturate(100%) invert(73%) sepia(8%) saturate(431%)
+      hue-rotate(176deg) brightness(94%) contrast(85%);
+  }
+
   &:disabled {
     cursor: not-allowed;
     opacity: 0.4;

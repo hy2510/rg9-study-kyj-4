@@ -5,6 +5,7 @@ import styled from 'styled-components'
 import HeaderBody from '@components/molecules/common/HeaderBody'
 import Header, { type HeaderProps } from '@components/organisms/common/Header'
 import { QuizFeedbackProvider } from '@contexts/QuizFeedbackContext'
+import { StudyStatusProvider } from '@contexts/StudyStatusContext'
 
 type StudyShellProps = {
   /** Header organism 에 그대로 전달되는 props (variant 별 union) */
@@ -36,15 +37,17 @@ export default function StudyShell({
 }: StudyShellProps) {
   return (
     <StudyWrapper>
-      <Header {...headerProps} />
+      <StudyStatusProvider headerProps={headerProps}>
+        <Header {...headerProps} />
 
-      <HeaderBody $headerExpanded>
-        <QuizFeedbackProvider character={character}>
-          {children}
-        </QuizFeedbackProvider>
-      </HeaderBody>
+        <HeaderBody $headerExpanded>
+          <QuizFeedbackProvider character={character}>
+            {children}
+          </QuizFeedbackProvider>
+        </HeaderBody>
 
-      {modals}
+        {modals}
+      </StudyStatusProvider>
     </StudyWrapper>
   )
 }

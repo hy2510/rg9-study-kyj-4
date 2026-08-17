@@ -31,7 +31,7 @@ const ButtonStyled = styled.button<{ $variant: 'primary' | 'secondary' }>`
     $variant === 'primary'
       ? '1.5px solid #1baa70'
       : resolveQuizSelectableFeedback({}).border};
-  border-radius: 15px;
+  border-radius: 20px;
   ${({ $variant }) =>
     $variant === 'primary'
       ? css`

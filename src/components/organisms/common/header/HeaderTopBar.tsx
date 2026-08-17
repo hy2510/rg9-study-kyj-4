@@ -1,8 +1,8 @@
+import { media } from '@styles/tokens/breakpoints'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
 
 import { IconMenu } from '@components/atoms/common/icons/IconMenu'
-import HeaderMenuButton from '@components/atoms/common/sideMenu/HeaderMenuButton'
 import QuizStatusPill, {
   type QuizStatusPillProps,
 } from '@components/molecules/common/header/QuizStatusPill'
@@ -33,28 +33,75 @@ export default function HeaderTopBar({
 
   return (
     <>
-      <QuizStatusPill {...quizStatus} />
-
-      <TopBarMenuCluster>
-        <HeaderMenuButton
+      {variant === 'study' || variant === 'story' ? (
+        <MenuButton
           type='button'
-          aria-label={t('header.menu')}
           onClick={onToggleMenu}
+          aria-label={t('header.menu')}
         >
-          <IconMenu width={20} height={20} alt='' />
-        </HeaderMenuButton>
+          <IconMenu width={28} height={28} alt='' />
+        </MenuButton>
+      ) : (
+        <QuizStatusPill
+          {...quizStatus}
+          onClick={onToggleMenu}
+          ariaLabel={t('header.menu')}
+        />
+      )}
 
-        {segmentToggle.show && (
+      {segmentToggle.show && (
+        <TopBarMenuCluster>
           <StoryQuizSegmentToggle
             storySideActive={storySideActive}
             quizSideActive={quizSideActive}
             onSelect={segmentToggle.onSelect}
           />
-        )}
-      </TopBarMenuCluster>
+        </TopBarMenuCluster>
+      )}
     </>
   )
 }
+
+const MenuButton = styled.button`
+  position: fixed;
+  top: calc(15px + env(safe-area-inset-top, 0px));
+  right: calc(8px + env(safe-area-inset-right, 0px));
+  z-index: 100;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.5);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  appearance: none;
+  cursor: pointer;
+  transition:
+    transform 0.15s ease,
+    opacity 0.15s ease;
+
+  &:active {
+    transform: scale(0.93);
+    opacity: 0.88;
+  }
+
+  img,
+  svg {
+    display: block;
+    width: 16px;
+    height: 16px;
+  }
+
+  ${media.mobile} {
+    top: calc(16px + env(safe-area-inset-top, 0px));
+    right: calc(8px + env(safe-area-inset-right, 0px));
+  }
+`
 
 const TopBarMenuCluster = styled.div`
   position: fixed;
@@ -64,4 +111,9 @@ const TopBarMenuCluster = styled.div`
   display: flex;
   align-items: center;
   gap: 8px;
+
+  ${media.mobile} {
+    top: calc(10px + env(safe-area-inset-top, 0px));
+    right: calc(10px + env(safe-area-inset-right, 0px));
+  }
 `

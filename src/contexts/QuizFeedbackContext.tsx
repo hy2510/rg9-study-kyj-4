@@ -10,6 +10,7 @@ import {
   useState,
 } from 'react'
 
+import { media } from '@styles/tokens/breakpoints'
 import { useTranslation } from 'react-i18next'
 import { styled } from 'styled-components'
 
@@ -157,17 +158,6 @@ export function QuizFeedbackProvider({
           onClick={dismissAndContinue}
           onTransitionEnd={onFeedbackBarTransitionEnd}
         >
-          <CharacterFigure aria-hidden>
-            <img
-              src={
-                banner.isCorrect
-                  ? characterMarks.correct
-                  : characterMarks.incorrect
-              }
-              alt=''
-              draggable={false}
-            />
-          </CharacterFigure>
           <FeedbackTextCol>
             <FeedbackTitle>
               <TranslatedLine
@@ -184,10 +174,23 @@ export function QuizFeedbackProvider({
                   Right Answer | {banner.correctAnswer}
                 </span>
               ) : (
-                <TranslatedLine i18nKey={QUIZ_FEEDBACK.TAP_TO_CONTINUE} />
+                <span className='tap-to-continue'>
+                  <TranslatedLine i18nKey={QUIZ_FEEDBACK.TAP_TO_CONTINUE} />
+                </span>
               )}
             </FeedbackHint>
           </FeedbackTextCol>
+          <CharacterFigure aria-hidden>
+            <img
+              src={
+                banner.isCorrect
+                  ? characterMarks.correct
+                  : characterMarks.incorrect
+              }
+              alt=''
+              draggable={false}
+            />
+          </CharacterFigure>
         </FeedbackBar>
       ) : null}
     </QuizFeedbackContext.Provider>
@@ -230,6 +233,14 @@ const FeedbackBar = styled.div<{
     transform 0.25s ease,
     opacity 0.25s ease;
   will-change: transform, opacity;
+
+  ${media.mobile} {
+    min-height: 80px;
+    padding: 8px 16px;
+    box-sizing: border-box;
+    justify-content: space-between;
+    gap: 12px;
+  }
 `
 
 const CharacterFigure = styled.div`
@@ -244,10 +255,26 @@ const CharacterFigure = styled.div`
     max-width: 200px;
     object-fit: contain;
   }
+
+  ${media.mobile} {
+    right: 0;
+
+    img {
+      min-width: 0;
+      width: 100%;
+      max-width: 120px;
+    }
+  }
 `
 
 const FeedbackTextCol = styled.div`
   width: fit-content;
+
+  ${media.mobile} {
+    flex: 1;
+    min-width: 0;
+    padding-left: 4px;
+  }
 `
 
 const FeedbackTitle = styled.div`
@@ -255,6 +282,11 @@ const FeedbackTitle = styled.div`
   font-size: 2em;
   font-weight: 800;
   font-family: 'Rg-B', 'Fredoka', sans-serif;
+
+  ${media.mobile} {
+    text-align: left;
+    font-size: 1.5em;
+  }
 `
 
 const FeedbackHint = styled.div`
@@ -265,5 +297,14 @@ const FeedbackHint = styled.div`
 
   .right-answer {
     color: #3c4b62;
+  }
+
+  .tap-to-continue {
+    opacity: 0.5;
+  }
+
+  ${media.mobile} {
+    text-align: left;
+    font-size: 1em;
   }
 `

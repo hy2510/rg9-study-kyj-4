@@ -1,3 +1,4 @@
+import { media } from '@styles/tokens/breakpoints'
 import styled from 'styled-components'
 
 import { IconSoundPlay } from '@components/atoms/common/icons/IconSoundPlay'
@@ -21,12 +22,15 @@ export function SoundPlayToggleIcon({
   isPlaying,
   disabled = false,
   onClick,
-  size = 60,
+  size = 40,
   icon = <IconSoundPlay width={size} height={size} />,
 }: SoundPlayToggleIconProps) {
   return (
     <ToggleButtonStyled
-      onClick={onClick}
+      onClick={() => {
+        if (disabled) return
+        onClick()
+      }}
       $disabled={disabled}
       $size={size}
       role='button'
@@ -47,10 +51,27 @@ const ToggleButtonStyled = styled.div<{ $disabled?: boolean; $size: number }>`
   align-items: center;
   justify-content: center;
   transition: transform 0.05s ease;
-  opacity: ${(props) => (props.$disabled ? 0 : 1)};
-  pointer-events: ${(props) => (props.$disabled ? 'none' : 'auto')};
+  opacity: ${(props) => (props.$disabled ? 0.45 : 1)};
 
   &:active {
-    transform: scale(0.98) translateY(1px);
+    transform: ${(props) =>
+      props.$disabled ? 'none' : 'scale(0.98) translateY(1px)'};
+  }
+
+  img,
+  svg {
+    width: ${(props) => props.$size}px;
+    height: ${(props) => props.$size}px;
+  }
+
+  ${media.mobile} {
+    width: 32px;
+    height: 32px;
+
+    img,
+    svg {
+      width: 32px;
+      height: 32px;
+    }
   }
 `

@@ -14,6 +14,7 @@ export type HeaderLegacyStudyProps = HeaderStudyBaseProps & {
    * 기반으로 컨테이너가 계산해 전달한다.
    */
   stepProgressMap: Record<number, LegacyStepProgress | undefined>
+  mappedStepActivity: string[]
   /** PB Vocabulary — 사이드 메뉴 단어 카드 노출 여부 */
   showVocaCardsMenu?: boolean
   onOpenVocaCards?: () => void

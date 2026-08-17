@@ -38,6 +38,7 @@ import WritingActivity2Review from '@components/templates/study/legacy/WritingAc
 import WritingActivity2Rewriting from '@components/templates/study/legacy/WritingActivity2Rewriting'
 import { AppContext, AppContextProps } from '@contexts/AppContext'
 import { HeartContextProvider, useHeartState } from '@contexts/HeartContext'
+import { QuestionSoundSlotProvider } from '@contexts/QuestionSoundSlotContext'
 import useCharacter from '@hooks/study/legacy/useCharacter'
 import { useLegacyQuizManager } from '@hooks/study/legacy/useLegacyQuizManager'
 import { useVocabularyPracticeByActivity } from '@hooks/study/legacy/useVocabularyPracticeByActivity'
@@ -637,6 +638,7 @@ export default function LegacyStudyContainer({
           openSteps: studyInfo.openSteps,
           currentStepId,
           stepProgressMap,
+          mappedStepActivity: studyInfo.mappedStepActivity,
           showVocaCardsMenu: needsPbVocaPreview && hasVocaData,
           onOpenVocaCards: handleOpenVocaCardsFromMenu,
           statusLabel:
@@ -660,7 +662,9 @@ export default function LegacyStudyContainer({
       >
         {isVisible && isPbVocaGateDone && !isVocaCardsOpen && component ? (
           <ActivityStage key={`${currentStepId}:${stepRunNonce}`}>
-            {component}
+            <QuestionSoundSlotProvider>
+              {component}
+            </QuestionSoundSlotProvider>
           </ActivityStage>
         ) : null}
         {isVisible &&

@@ -22,63 +22,55 @@ export default function StoryNavSection({
   const { t } = useTranslation()
 
   return (
-    <Stack gap={18}>
-      <Stack gap={20}>
-        <SideMenuRow>
-          Key Questions
-          <IconArrowRightUp width={10} height={10} alt='' />
-        </SideMenuRow>
-      </Stack>
-      <Divider />
-      <Stack gap={20}>
-        {typeof storyProps.onReadAgainClick === 'function' && (
-          <SideMenuRow
-            onClick={() => {
-              closeMenu()
-              storyProps.onReadAgainClick?.()
-            }}
-          >
-            {t('story.readAgain')}
-            <IconArrowRightUp width={10} height={10} alt='' />
-          </SideMenuRow>
-        )}
-        {typeof storyProps.onMovieClick === 'function' && (
-          <SideMenuRow
-            onClick={() => {
-              closeMenu()
-              storyProps.onMovieClick?.()
-            }}
-          >
-            {t('story.watchMovie')}
-            <IconArrowRightUp width={10} height={10} alt='' />
-          </SideMenuRow>
-        )}
-        {typeof storyProps.onSpeakClick === 'function' && (
-          <SideMenuRow
-            onClick={() => {
-              closeMenu()
-              storyProps.onSpeakClick?.()
-            }}
-          >
-            {t('header.speakPractice')}
-            <IconArrowRightUp width={10} height={10} alt='' />
-          </SideMenuRow>
-        )}
+    <Stack gap={20}>
+      <SideMenuRow
+        disabled={storyProps.isGoQuizDisabled}
+        onClick={() => {
+          closeMenu()
+          onNavigateStoryStudy()
+        }}
+      >
+        {t('story.takeQuiz')}
+        <IconArrowRightUp width={10} height={10} alt='' />
+      </SideMenuRow>
+      {typeof storyProps.onReadAgainClick === 'function' && (
         <SideMenuRow
-          disabled={storyProps.isGoQuizDisabled}
           onClick={() => {
             closeMenu()
-            onNavigateStoryStudy()
+            storyProps.onReadAgainClick?.()
           }}
         >
-          {t('story.takeQuiz')}
+          {t('story.readAgain')}
           <IconArrowRightUp width={10} height={10} alt='' />
         </SideMenuRow>
-        <SideMenuRow onClick={onExitStudy}>
-          {t('common.exit')}
+      )}
+      {typeof storyProps.onMovieClick === 'function' && (
+        <SideMenuRow
+          onClick={() => {
+            closeMenu()
+            storyProps.onMovieClick?.()
+          }}
+        >
+          {t('story.watchMovie')}
           <IconArrowRightUp width={10} height={10} alt='' />
         </SideMenuRow>
-      </Stack>
+      )}
+      {typeof storyProps.onSpeakClick === 'function' && (
+        <SideMenuRow
+          onClick={() => {
+            closeMenu()
+            storyProps.onSpeakClick?.()
+          }}
+        >
+          {t('header.speakPractice')}
+          <IconArrowRightUp width={10} height={10} alt='' />
+        </SideMenuRow>
+      )}
+      <Divider />
+      <SideMenuRow onClick={onExitStudy}>
+        {t('common.exit')}
+        <IconArrowRightUp width={10} height={10} alt='' />
+      </SideMenuRow>
     </Stack>
   )
 }

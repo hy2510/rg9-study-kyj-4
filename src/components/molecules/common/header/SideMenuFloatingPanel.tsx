@@ -12,7 +12,7 @@ const SideMenuFloatingPanel = styled.aside`
   flex-direction: column;
   gap: 18px;
   background: #fff;
-  border-radius: 20px;
+  border-radius: 30px;
   border: 1px solid #e5e7eb;
   animation: ${slideInFromRight} 0.22s ease both;
   padding: 30px;

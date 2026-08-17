@@ -8,7 +8,7 @@ export const MeaningPanel = styled.div`
   gap: 12px;
   padding: 32px 16px;
   background: #fff;
-  border-radius: 16px;
+  border-radius: 20px;
   border: 1.5px solid #e9edf3;
   margin-bottom: 16px;
 `

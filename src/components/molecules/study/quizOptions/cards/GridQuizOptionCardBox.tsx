@@ -29,7 +29,7 @@ export const GridQuizOptionCardBox = styled(QuizSelectableFeedbackBox)<{
   }};
   min-height: 36px;
   height: fit-content;
-  border-radius: 15px;
+  border-radius: 20px;
   display: flex;
   justify-content: center;
   align-items: center;

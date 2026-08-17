@@ -93,8 +93,7 @@ export default function Header(props: HeaderProps) {
               )
             : '',
           currentHeart: studyProps?.currentHeart ?? 0,
-          showProgressText:
-            props.variant === 'story' || props.variant === 'speak',
+          showProgressText: props.variant === 'speak',
           progress,
           total,
           statusLabel: studyProps?.statusLabel,

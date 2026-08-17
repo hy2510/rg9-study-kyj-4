@@ -118,17 +118,21 @@ export default function ReadingComprehension4(props: ILegacyStudyData) {
       isFinishStudy: props.lastStep === props.currentStep,
     })
 
+    const isLastQuestion = currentQuizIndex >= totalQuiz
+
     try {
       const res = await saveUserAnswer(studyInfo.mode, userAnswer)
-      if (Number(res.result) !== 0) {
+      if (Number(res.result) !== 0 && !isLastQuestion) {
         isWorking.current = false
         setSelectedText(null)
         return
       }
     } catch {
-      isWorking.current = false
-      setSelectedText(null)
-      return
+      if (!isLastQuestion) {
+        isWorking.current = false
+        setSelectedText(null)
+        return
+      }
     }
 
     studentAnswer.addStudentAnswer(answerData)

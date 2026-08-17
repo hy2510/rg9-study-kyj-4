@@ -1,8 +1,10 @@
 import {
   type MouseEvent,
+  type TouchEvent,
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from 'react'
 
@@ -16,6 +18,7 @@ import VocaWordCard, {
   type VocaSlide,
 } from '@components/organisms/story/VocaWordCard'
 import useStoryAudioWord from '@hooks/story/useStoryAudioWord'
+import useStoryBookSwipe from '@hooks/story/useStoryBookSwipe'
 import type {
   IVocabulary1Practice,
   IVocabulary1Quiz,
@@ -197,6 +200,33 @@ export default function VocaPreviewPopup({
     setIndex((i) => (i + 1) % count)
   }, [count])
 
+  const swipeConsumedRef = useRef(false)
+  const { onTouchStart, onTouchCancel, onTouchEnd } = useStoryBookSwipe({
+    onSwipeLeft: () => {
+      swipeConsumedRef.current = true
+      goNext()
+    },
+    onSwipeRight: () => {
+      swipeConsumedRef.current = true
+      goPrev()
+    },
+  })
+
+  const handleCardTouchStart = useCallback(
+    (e: TouchEvent<HTMLDivElement>) => {
+      swipeConsumedRef.current = false
+      onTouchStart(e)
+    },
+    [onTouchStart],
+  )
+
+  const handleCardClickCapture = useCallback((e: MouseEvent<HTMLDivElement>) => {
+    if (!swipeConsumedRef.current) return
+    e.preventDefault()
+    e.stopPropagation()
+    swipeConsumedRef.current = false
+  }, [])
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'ArrowLeft') {
@@ -256,7 +286,12 @@ export default function VocaPreviewPopup({
                 <IconChevLeftGray width={28} height={28} />
               </Chevron>
 
-              <Viewport>
+              <Viewport
+                onTouchStart={handleCardTouchStart}
+                onTouchCancel={onTouchCancel}
+                onTouchEnd={onTouchEnd}
+                onClickCapture={handleCardClickCapture}
+              >
                 <Stage
                   key={`${index}-${transitionDirection}`}
                   $direction={transitionDirection}
@@ -422,6 +457,7 @@ const Viewport = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
+  touch-action: pan-y;
 `
 
 const Stage = styled.div<{ $direction: TransitionDirection }>`

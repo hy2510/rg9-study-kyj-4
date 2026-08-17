@@ -8,6 +8,12 @@
   --scrollbar-thumb-hover: rgba(100, 116, 139, 0.6);
 }
 
+@media (max-width: 767px) {
+  :root {
+    font-size: 14px;
+  }
+}
+
 html,
 body,
 *,

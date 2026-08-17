@@ -1,3 +1,4 @@
+import { media } from '@styles/tokens/breakpoints'
 import styled from 'styled-components'
 
 type TextProps = {
@@ -67,4 +68,9 @@ const TextStyled = styled.div<{
       : $color === 'secondary'
         ? '#a2b1c4'
         : $color};
+
+  ${media.mobile} {
+    font-size: ${({ $fontSize }) =>
+      `max(12px, ${Math.round($fontSize * 16 * 0.85 * 100) / 100}px)`};
+  }
 `

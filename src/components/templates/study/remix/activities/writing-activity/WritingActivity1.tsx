@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { shuffle } from 'lodash'
 import { useTranslation } from 'react-i18next'
@@ -18,6 +18,7 @@ import { WritingWordBankCardBox } from '@components/molecules/study/quizOptions/
 import { useQuizFeedbackOptional } from '@contexts/QuizFeedbackContext'
 import type { AugmentOptions } from '@hooks/study/remix/useAugmentManager'
 import { BaseQuiz } from '@hooks/study/remix/useQuizManager'
+import { useWritingActivity1SlotInteraction } from '@hooks/study/useWritingActivity1SlotInteraction'
 import { ACTIVITY_INSTRUCTIONS } from '@src/constants/study/activityInstructions'
 
 type WritingActivity1Props = {
@@ -139,18 +140,57 @@ export default function WritingActivity1({
     [isChecked, selectedIds],
   )
 
-  // 모든 카드가 슬롯으로 이동하면 정오답 체크
+  const handleSlotReorder = useCallback(
+    (fromIndex: number, toIndex: number) => {
+      if (isChecked || fromIndex === toIndex) return
+      setSelectedIds((prev) => {
+        if (
+          fromIndex < 0 ||
+          toIndex < 0 ||
+          fromIndex >= prev.length ||
+          toIndex >= prev.length
+        ) {
+          return prev
+        }
+        const next = [...prev]
+        const [moved] = next.splice(fromIndex, 1)
+        next.splice(toIndex, 0, moved)
+        return next
+      })
+    },
+    [isChecked],
+  )
+
+  const isDraggingRef = useRef(false)
+
+  const { getSlotProps, isHolding } = useWritingActivity1SlotInteraction({
+    selectedCount: selectedIds.length,
+    isChecked,
+    onReorder: handleSlotReorder,
+    onRemove: handleSlotClick,
+    onDragStart: () => {
+      isDraggingRef.current = true
+    },
+    onDragEnd: () => {
+      isDraggingRef.current = false
+    },
+  })
+
   useEffect(() => {
-    if (!isCompleted || isChecked) return
+    if (!isCompleted || isChecked || isHolding) return
 
-    const correct = selectedIds.every((id, i) => {
-      const token = tokenById.get(id)
-      return token?.answerIndex === i
-    })
+    const timer = window.setTimeout(() => {
+      if (isDraggingRef.current) return
+      const correct = selectedIds.every((id, i) => {
+        const token = tokenById.get(id)
+        return token?.answerIndex === i
+      })
+      setCheckState(correct ? 'correct' : 'incorrect')
+      onComplete(correct)
+    }, 600)
 
-    setCheckState(correct ? 'correct' : 'incorrect')
-    onComplete(correct)
-  }, [isCompleted, isChecked, selectedIds, tokenById, onComplete])
+    return () => window.clearTimeout(timer)
+  }, [isCompleted, isChecked, isHolding, selectedIds, tokenById, onComplete])
 
   return (
     <>
@@ -169,7 +209,7 @@ export default function WritingActivity1({
             $isCorrect={isCorrect}
             $isIncorrect={isIncorrect}
           >
-            <WritingActivity1SentenceRow>
+            <WritingActivity1SentenceRow $isCorrect={isCorrect}>
               {Array.from({ length: slotCount }).map((_, i) => {
                 const token = selectedIds[i]
                   ? tokenById.get(selectedIds[i])
@@ -185,7 +225,7 @@ export default function WritingActivity1({
                     $isIncorrect={isIncorrect}
                     $clickable={!isChecked && !!token}
                     $isCompleted={isCompleted}
-                    onClick={() => handleSlotClick(i)}
+                    {...getSlotProps(i, !!token)}
                   >
                     <TextBox
                       fontSize={isCorrect ? 1.6 : 1.3}

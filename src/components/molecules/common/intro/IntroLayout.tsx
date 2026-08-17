@@ -42,7 +42,7 @@ export const IntroStartButton = styled.button`
   max-width: 400px;
   height: 60px;
   border: 1.5px solid #1baa70;
-  border-radius: 15px;
+  border-radius: 20px;
   margin-top: 4px;
   padding: 0;
   ${css`

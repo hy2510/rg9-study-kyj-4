@@ -77,7 +77,7 @@ const SpeakStartButton = styled.button`
   max-width: 400px;
   height: 60px;
   border: none;
-  border-radius: 15px;
+  border-radius: 20px;
   margin-top: 4px;
   padding: 0 20px;
   background: #354257;
